@@ -1,0 +1,77 @@
+name: Discord notifications
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notify:
+    # Fork pull requests do not receive repository secrets.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        shell: python
+        run: |
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          webhook = os.environ.get("DISCORD_WEBHOOK_URL", "")
+          if not webhook:
+              sys.exit("Missing repository secret: DISCORD_WEBHOOK_URL")
+
+          with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as file:
+              event = json.load(file)
+
+          repo = os.environ["GITHUB_REPOSITORY"]
+          actor = os.environ["GITHUB_ACTOR"]
+          base_url = os.environ["GITHUB_SERVER_URL"]
+          event_name = os.environ["GITHUB_EVENT_NAME"]
+
+          if event_name == "pull_request":
+              pr = event["pull_request"]
+              title = pr["title"][:200]
+              message = (
+                  f"{repo}: PR #{pr['number']} ({event['action']})\n"
+                  f"{title}\nAv: {actor}\n{pr['html_url']}"
+              )
+          elif event_name == "push":
+              link = event.get("compare") or f"{base_url}/{repo}"
+              message = f"{repo}: main har uppdaterats av {actor}.\n{link}"
+          else:
+              message = f"Test: GitHub Actions kan skicka till Discord!\n{repo}"
+
+          payload = json.dumps({
+              "content": message,
+              "allowed_mentions": {"parse": []}
+          }).encode("utf-8")
+
+          request = urllib.request.Request(
+              webhook,
+              data=payload,
+              headers={
+                  "Content-Type": "application/json",
+                  "User-Agent": "ShipItBudget-DiscordNotifier/1.0"
+              },
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  print(f"Discord notification sent (HTTP {response.status}).")
+          except urllib.error.HTTPError as error:
+              sys.exit(f"Discord returned HTTP {error.code}.")
+          except urllib.error.URLError:
+              sys.exit("Could not reach Discord.")
