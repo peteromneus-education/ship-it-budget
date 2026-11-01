@@ -1,4 +1,4 @@
-// Kopplar ihop lagring, tjänst och UI. Lägg senare till inläsning, kalenderstart och sparande vid normalt avslut.
+// Kopplar ihop lagring, logik och UI.
 
 using ShipItBudget.UI;
 
