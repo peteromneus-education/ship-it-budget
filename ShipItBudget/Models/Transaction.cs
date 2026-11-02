@@ -1,16 +1,7 @@
 using System;
 using System.Data.Common;
 using System.Runtime;
-// Beskriver en inkomst eller utgift. Använd Id för att hitta rätt transaktion vid ändring och radering.
-/* en ny transaktion får ett unikt ID och sparas via datalagringen.
 
-Belopp måste vara större än noll och inkomst/utgift anges med TransactionType.
-
-Obligatoriska uppgifter valideras innan transaktionen läggs till.
-
-Tjänsten kan hämta och sortera transaktioner för ett valt datum med LINQ. I BudgetService
-
-Flera transaktioner på samma datum och dagar utan transaktioner fungerar */
 
 public class Transaction
 {
@@ -22,7 +13,11 @@ public class Transaction
 
     public Transaction(decimal amount, TransactionType type, string category ) // Konstruktör 
     {
-      
+        if(amount <= 0) // sätter stopp för en transaktion som är mindre än 0, Oklart om den ska vara kvar
+        {
+            throw new ArgumentException("Beloppet måste va större än 0"); //brytter den nya transaktionen
+        }
+
         Id = Guid.NewGuid();
         Amount = amount; 
         Type = type;
@@ -30,7 +25,6 @@ public class Transaction
         Category = category;
 
     }
-
 }
 
 
