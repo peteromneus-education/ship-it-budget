@@ -11,11 +11,20 @@ public class Transaction
     public DateTime Date {get; set;} 
     public string Category {get; set;}
 
+
+    public static bool Isvalid(decimal amount, string category) //Valederings metod som kollar så en transaktion är Valid
+    {
+        if(amount <= 0) return false;
+        if(string.IsNullOrWhiteSpace(category)) return false;
+        return true;
+
+    }
+
     public Transaction(decimal amount, TransactionType type, string category ) // Konstruktör 
     {
-        if(amount <= 0) // sätter stopp för en transaktion som är mindre än 0, Oklart om den ska vara kvar
+        if(Isvalid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
         {
-            throw new ArgumentException("Beloppet måste va större än 0"); //brytter den nya transaktionen
+            throw new ArgumentException("Ogiltiga värden uppgavs"); //brytter den nya transaktionen
         }
 
         Id = Guid.NewGuid();
