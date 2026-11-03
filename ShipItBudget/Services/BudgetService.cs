@@ -1,7 +1,7 @@
 
 using System;
 
-public class TransactionService
+public class BudgetService
 {
     private List<Transaction> transactions = new List<Transaction>();
     //JASON ?
@@ -28,19 +28,19 @@ public class TransactionService
         return true;
     }
 
-    public string? UpdateTransaction(Guid Id, decimal newamount, TransactionType newType, DateTime newDate, string newcatagory) //string? så man kan sriva i retrun
+    public string? UpdateTransaction(Guid Id, decimal newamount, TransactionType newType, DateTime newDate, string newcategory) //string? så man kan sriva i retrun
     {
         var transaction = transactions.FirstOrDefault(transaction => transaction.Id == Id); //samma princip som Deleate metoden
         if(transaction == null)
         {
             return "Hittade inte transaktionen";
         }
-        if(Transaction.IsValid(newamount, newcatagory) == false)//använder valedringsmetoden på dem nya värderna
+        if(Transaction.IsValid(newamount, newcategory) == false)//använder valedringsmetoden på dem nya värderna
         {
             return "Fel! Ogiltiga värden";
         }
         //Sätter de nya väderna genom Uptade metoden från Transaction klassen
-        transaction.Update(newamount, newType, newDate, newcatagory);
+        transaction.Update(newamount, newType, newDate, newcategory);
 
         return null;
     }
