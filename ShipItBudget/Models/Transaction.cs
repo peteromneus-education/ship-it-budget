@@ -5,14 +5,26 @@ using System.Runtime;
 
 public class Transaction
 {
-    public Guid Id {get; set;}// Guid skapar unikt id nummer
-    public decimal Amount {get; set;}
-    public TransactionType Type {get; set;}
-    public DateTime Date {get; set;} 
-    public string Category {get; set;}
+    public Guid Id {get; private set;}// Guid skapar unikt id nummer
+    public decimal Amount {get; private set;}
+    public TransactionType Type {get; private set;}
+    public DateTime Date {get; private set;} 
+    public string Category {get; private set;}
+
+    public void Update(decimal amount, TransactionType type, DateTime date, string category) //metod som gör det möjligt att upptadera utanför klassen
+    {
+        if(IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
+        {
+            throw new ArgumentException("Ogiltiga värden uppgavs"); //brytter den nya transaktionen
+        }
+        Amount = amount;
+        Type = type;
+        Date = date;
+        Category = category;
+    }
 
 
-    public static bool Isvalid(decimal amount, string category) //Valederings metod som kollar så en transaktion är Valid
+    public static bool IsValid(decimal amount, string category) //Valederings metod som kollar så en transaktion är Valid
     {
         if(amount <= 0) return false;
         if(string.IsNullOrWhiteSpace(category)) return false;
@@ -20,9 +32,9 @@ public class Transaction
 
     }
 
-    public Transaction(decimal amount, TransactionType type, string category ) // Konstruktör 
+    public Transaction(decimal amount, TransactionType type, string category, DateTime? date = null ) // Konstruktör 
     {
-        if(Isvalid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
+        if(IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
         {
             throw new ArgumentException("Ogiltiga värden uppgavs"); //brytter den nya transaktionen
         }
@@ -30,7 +42,7 @@ public class Transaction
         Id = Guid.NewGuid();
         Amount = amount; 
         Type = type;
-        Date = DateTime.Now; // Sätter så datumet blir direkt när en transaktion skapas
+        Date = date ?? DateTime.Now; // Om man inte sätter datum sätts det automatiskt dagens
         Category = category;
     }
 }
