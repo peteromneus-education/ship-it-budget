@@ -46,9 +46,18 @@ public class TransactionService
 
         return true;
     }
+    public bool AddTransaction(decimal amount, TransactionType type, string category)
+    {
+        if(Transaction.Isvalid(amount, category) == false)
+        {
+            return false;
+        }
 
+        Transaction newtransaction = new Transaction(amount, type, category);//Nytt obejekt, konstrukton sätter datum och id
 
+        transactions.Add(newtransaction);
+        return true;
 
-    
+    }
 
 }

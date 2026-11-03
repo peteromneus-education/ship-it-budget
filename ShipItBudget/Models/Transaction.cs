@@ -32,7 +32,6 @@ public class Transaction
         Type = type;
         Date = DateTime.Now; // Sätter så datumet blir direkt när en transaktion skapas
         Category = category;
-
     }
 }
 
