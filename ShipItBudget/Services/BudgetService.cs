@@ -80,7 +80,20 @@ public class BudgetService
     {
         return monthlyBudgets.FirstOrDefault(budget => budget.Month == month && budget.Year == year);
     }
-    
+    public string? UpdateMonthlyBudget(int month, int year, decimal newlimit)// metod för att uppdatera Budgeten obs ändast gränsen
+    {
+        MonthlyBudget ? budget = GetBudget(month, year); // Använder getmetoden ifall jag får null så hittar den ej
+        if(budget == null)
+        {
+            return "Hitttade ingen Budget för den månaden";
+        }
+        string? felMeddelande = budget.Update(newlimit); // använder update metoden från MonlyBudget klassen 
+        if (felMeddelande != null)
+        {
+        return felMeddelande; // få tillbaka felet
+        }
+        return null; 
+    }
 
 
 }
