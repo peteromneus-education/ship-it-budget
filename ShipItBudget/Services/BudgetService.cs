@@ -3,6 +3,7 @@ using System;
 
 public class BudgetService
 {
+    private List<MonthlyBudget> monthlyBudgets = new List<MonthlyBudget>();
     private List<Transaction> transactions = new List<Transaction>();
     //JASON ?
 
@@ -57,5 +58,24 @@ public class BudgetService
         return true;
 
     }
+    public string? AddBudget(int month, int year, decimal limit)
+    {
+        string? FelMeddelande = MonthlyBudget.IsValid(month, year, limit); // Använder IsValid, får ur rätt fel beroende på felet
+        if(FelMeddelande != null)
+        {
+            return FelMeddelande;
+        }
+
+        bool exits = monthlyBudgets.Any(budget => budget.Year == year && budget.Month == month); //kollar iaf de finns en budget redan
+        if(exits)
+        {
+            return "Det finns redan en budget för den här månaden";
+        }
+
+        MonthlyBudget nyBudget = new MonthlyBudget(month, year, limit); // skapa nytt obejekt
+        monthlyBudgets.Add(nyBudget); // lägger till
+        return null;
+    }
+
 
 }

@@ -16,14 +16,14 @@ Inkomster och utgifter summeras separat för en vald dag och månad med LINQ.
 Återstående budget beräknas som utgiftsgräns minus månadens utgifter och kan vara negativ.
 
 Avsaknad av budget skiljs från en budget på noll; beräknade summor lagras inte som extra modellfält. */
-public class Budget
+public class MonthlyBudget
 {
     public int Month {get; private set;}
     public int Year {get; private set;}
     public decimal Limit {get; private set;}
 
     //Följer samma princip som Transactionklassen med konstruktör och valederings metod. Olika felmeddelande beroende på fel
-    public Budget(int month, int year, decimal limit)
+    public MonthlyBudget(int month, int year, decimal limit)
     {
         string? FelMeddelande = IsValid(month, year, limit);
         if(FelMeddelande != null)
@@ -49,7 +49,7 @@ public class Budget
         return null;
     }
 
-    public string? Update(decimal newlimit) // Metod för att kunna ändra Limiten, månad och år e låst 
+    public string? Update(decimal newlimit) // Metod för att kunna nå Limiten, månad och år e låst 
     {
         if(newlimit < 0)
         {
