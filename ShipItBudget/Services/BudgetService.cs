@@ -66,7 +66,7 @@ public class BudgetService
             return FelMeddelande;
         }
 
-        bool exits = monthlyBudgets.Any(budget => budget.Year == year && budget.Month == month); //kollar iaf de finns en budget redan
+        bool exits = monthlyBudgets.Any(budget => budget.Month == month && budget.Year == year); //kollar iaf de finns en budget redan
         if(exits)
         {
             return "Det finns redan en budget för den här månaden";
@@ -76,6 +76,11 @@ public class BudgetService
         monthlyBudgets.Add(nyBudget); // lägger till
         return null;
     }
+    public MonthlyBudget? GetBudget(int month, int year) // metod för att hämta rätt budget, kommer retunera null ifall den ej hittas
+    {
+        return monthlyBudgets.FirstOrDefault(budget => budget.Month == month && budget.Year == year);
+    }
+    
 
 
 }
