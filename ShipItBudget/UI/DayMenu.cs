@@ -6,43 +6,70 @@ namespace ShipItBudget.UI;
 
 public class DayMenu
 {
-    public static void Show(DateTime selectedDate, List<ExampleTransaction> transactionsForSelectedDate)
+    private readonly BudgetService budgetService;
+
+    public DayMenu(BudgetService budgetService)
     {
-        Table transactionsTable = new();
+        this.budgetService = budgetService;
+    }
 
-        transactionsTable.Title($"Transaktioner för {selectedDate:yyyy-MM-dd}");
-        transactionsTable.Caption("Tryck valfri tangent för att återgå till kalendern.");
-        transactionsTable.ShowRowSeparators();
-        transactionsTable.AddColumn("Typ");
-        transactionsTable.AddColumn("Belopp");
+    public void Show(DateTime selectedDate)
+    {
+        bool keepDisplayingTable = true;
 
-        if (transactionsForSelectedDate.Count == 0)
+        while (keepDisplayingTable)
         {
-            transactionsTable.AddRow("Inga transaktioner", "");
-        }
-        else
-        {
-            foreach (ExampleTransaction transaction in transactionsForSelectedDate)
+            Console.Clear();
+
+            List<Transaction> transactionsForSelectedDate = budgetService.GettransactionbyDate(selectedDate);
+
+            Table transactionsTable = new();
+            transactionsTable.Title($"Transaktioner för {selectedDate:yyyy-MM-dd}");
+            transactionsTable.ShowRowSeparators();
+            transactionsTable.AddColumn("Typ");
+            transactionsTable.AddColumn("Kategori");
+            transactionsTable.AddColumn("Belopp");
+
+            if (transactionsForSelectedDate.Count == 0)
             {
-                string transactionTypeText;
-
-                if (transaction.IsIncome)
+                transactionsTable.AddRow("Inga transaktioner", "", "");
+            }
+            else
+            {
+                foreach (Transaction transaction in transactionsForSelectedDate)
                 {
-                    transactionTypeText = "Inkomst";
-                }
-                else
-                {
-                    transactionTypeText = "Utgift";
-                }
+                    string transactionTypeText = TransactionTypeText.DisplayText(transaction.Type);
 
-                transactionsTable.AddRow(
-                transactionTypeText,
-                $"{transaction.Amount} kr");
+                    transactionsTable.AddRow(transactionTypeText, Markup.Escape(transaction.Category),
+                        $"{transaction.Amount} kr");
+                }
+            }
+
+            AnsiConsole.Write(transactionsTable);
+            Console.WriteLine();
+
+            string choice = AnsiConsole.Prompt(
+    new SelectionPrompt<string>()
+        .Title("Välj ett alternativ:")
+        .WrapAround()
+        .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+        .AddChoices("Ny transaktion")
+        .AddChoices("Redigera transaktion")
+        .AddChoices("Tillbaka"));
+
+            switch (choice)
+            {
+                case "Ny transaktion":
+                    TransactionForm transactionForm = new(budgetService);
+                    transactionForm.AddTransaction(selectedDate);
+                    break;
+                case "Redigera transaktion":
+                    // Implementera redigeringslogik här
+                    break;
+                case "Tillbaka":
+                    keepDisplayingTable = false;
+                    break;
             }
         }
-
-        AnsiConsole.Write(transactionsTable);
-        Console.ReadKey(true);
-        Console.Clear();
     }
 }

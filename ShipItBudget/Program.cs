@@ -1,10 +1,8 @@
 // Kopplar ihop lagring, logik och UI.
 
- using ShipItBudget.UI;
+using ShipItBudget.UI;
 
-CalendarView calendarView = new();
-calendarView.Show();  
+BudgetService budgetService = new BudgetService();
 
-
-
-
+MainMenu mainMenu = new MainMenu(budgetService);
+mainMenu.Show();
