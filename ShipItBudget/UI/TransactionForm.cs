@@ -11,10 +11,9 @@ namespace ShipItBudget.UI
             this.budgetService = budgetService;
         }
 
-        public void AddTransaction(DateTime formDate)
+        public void ShowAdd(DateTime formDate)
         {
             Console.Clear();
-
             Console.WriteLine("LÄGG TILL NY TRANSAKTION\n");
 
             decimal amount = AnsiConsole.Prompt(new TextPrompt<decimal>("Ange belopp:")
@@ -57,4 +56,6 @@ namespace ShipItBudget.UI
             }
         }
     }
+
+
 }

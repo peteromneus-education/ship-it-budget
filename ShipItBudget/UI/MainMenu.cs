@@ -39,7 +39,7 @@ namespace ShipItBudget.UI
                 {
                     case "Ny transaktion":
                         TransactionForm transactionForm = new TransactionForm(budgetService);
-                        transactionForm.AddTransaction(DateTime.Today);
+                        transactionForm.ShowAdd(DateTime.Today);
                         break;
                     case "Visa kalendern":
                         CalendarView calendarView = new CalendarView(budgetService);

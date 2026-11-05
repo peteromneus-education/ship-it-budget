@@ -61,11 +61,28 @@ public class DayMenu
             {
                 case "Ny transaktion":
                     TransactionForm transactionForm = new(budgetService);
-                    transactionForm.AddTransaction(selectedDate);
+                    transactionForm.ShowAdd(selectedDate);
                     break;
+
                 case "Redigera transaktion":
-                    // Implementera redigeringslogik här
+                    if (transactionsForSelectedDate.Count == 0)
+                    {
+                        AnsiConsole.MarkupLine("[red]Inga transaktioner att redigera![/]");
+                        Console.ReadKey();
+                        break;
+                    }
+                    var selectedTransaction = AnsiConsole.Prompt(
+                    new SelectionPrompt<Transaction>()
+                        .Title("Välj en transaktion att redigera:")
+                        .WrapAround()
+                        .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+                        .UseConverter(transaction => $"{TransactionTypeText.DisplayText(transaction.Type)} - {Markup.Escape(transaction.Category)} - {transaction.Amount} kr")
+                        .AddChoices(transactionsForSelectedDate));
+
+                    AnsiConsole.MarkupLine($"\n[green]Vald transaktion:[/] {TransactionTypeText.DisplayText(selectedTransaction.Type)} - {Markup.Escape(selectedTransaction.Category)} - {selectedTransaction.Amount} kr");
+                    Console.ReadKey(true);
                     break;
+
                 case "Tillbaka":
                     keepDisplayingTable = false;
                     break;
