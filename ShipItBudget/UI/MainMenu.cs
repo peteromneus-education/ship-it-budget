@@ -41,23 +41,32 @@ namespace ShipItBudget.UI
                         TransactionForm transactionForm = new TransactionForm(budgetService);
                         transactionForm.ShowAdd(DateTime.Today);
                         break;
+
                     case "Visa kalendern":
                         CalendarView calendarView = new CalendarView(budgetService);
                         calendarView.Show();
                         break;
+
                     case "Redigera transaktion":
+                        AnsiConsole.MarkupLine("[yellow]Funktionen är inte implementerad än.[/]");
+                        Console.ReadKey(true);
                         break;
+
                     case "Redigera budget":
+                        AnsiConsole.MarkupLine("[yellow]Funktionen är inte implementerad än.[/]");
+                        Console.ReadKey(true);
                         break;
+
                     case "Avsluta programmet":
                         keepMainMenuOpen = false;
                         break;
+
                     default:
-                        AnsiConsole.MarkupLine("[red]Ogiltigt val![/]");
+                        AnsiConsole.MarkupLine("[yellow]Ogiltigt val![/]");
+                        Console.ReadKey(true);
                         break;
                 }
             }
         }
-
     }
 }

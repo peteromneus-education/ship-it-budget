@@ -55,6 +55,7 @@ public class DayMenu
         .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
         .AddChoices("Ny transaktion")
         .AddChoices("Redigera transaktion")
+        .AddChoices("Radera transaktion")
         .AddChoices("Tillbaka"));
 
             switch (choice)
@@ -68,19 +69,40 @@ public class DayMenu
                     if (transactionsForSelectedDate.Count == 0)
                     {
                         AnsiConsole.MarkupLine("[red]Inga transaktioner att redigera![/]");
-                        Console.ReadKey();
+                        Console.ReadKey(true);
                         break;
                     }
-                    var selectedTransaction = AnsiConsole.Prompt(
-                    new SelectionPrompt<Transaction>()
-                        .Title("Välj en transaktion att redigera:")
-                        .WrapAround()
-                        .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
-                        .UseConverter(transaction => $"{TransactionTypeText.DisplayText(transaction.Type)} - {Markup.Escape(transaction.Category)} - {transaction.Amount} kr")
-                        .AddChoices(transactionsForSelectedDate));
 
-                    AnsiConsole.MarkupLine($"\n[green]Vald transaktion:[/] {TransactionTypeText.DisplayText(selectedTransaction.Type)} - {Markup.Escape(selectedTransaction.Category)} - {selectedTransaction.Amount} kr");
-                    Console.ReadKey(true);
+                    Transaction transactionToEdit = ChooseTransaction(transactionsForSelectedDate, "Välj en transaktion att redigera:");
+                    TransactionForm editForm = new(budgetService);
+                    editForm.ShowEdit(transactionToEdit);
+                    break;
+
+                case "Radera transaktion":
+                    if (transactionsForSelectedDate.Count == 0)
+                    {
+                        AnsiConsole.MarkupLine("[red]Inga transaktioner att radera![/]");
+                        Console.ReadKey(true);
+                        break;
+                    }
+
+                    Transaction transactionToDelete = ChooseTransaction(transactionsForSelectedDate, "Välj en transaktion att radera:");
+
+                    if (ConfirmDelete(transactionToDelete))
+                    {
+                        bool deleted = budgetService.DeleteTransaction(transactionToDelete.Id);
+
+                        if (deleted)
+                        {
+                            AnsiConsole.MarkupLine("\n[green]Transaktionen raderades.[/]");
+                        }
+                        else
+                        {
+                            AnsiConsole.MarkupLine("\n[red]Transaktionen kunde inte hittas.[/]");
+                        }
+
+                        Console.ReadKey(true);
+                    }
                     break;
 
                 case "Tillbaka":
@@ -88,5 +110,31 @@ public class DayMenu
                     break;
             }
         }
+    }
+
+    private Transaction ChooseTransaction(List<Transaction> transactions, string title)
+    {
+        return AnsiConsole.Prompt(
+            new SelectionPrompt<Transaction>()
+                .Title(title)
+                .WrapAround()
+                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+                .UseConverter(DescribeTransaction)
+                .AddChoices(transactions));
+    }
+
+    private bool ConfirmDelete(Transaction transaction)
+    {
+        ConfirmationPrompt prompt = new ConfirmationPrompt($"Vill du radera {DescribeTransaction(transaction)}?")
+        {
+            DefaultValue = false // Enter betyder "nej", så att inget raderas av misstag
+        };
+
+        return AnsiConsole.Prompt(prompt);
+    }
+
+    private static string DescribeTransaction(Transaction transaction)
+    {
+        return $"{TransactionTypeText.DisplayText(transaction.Type)} - {Markup.Escape(transaction.Category)} - {transaction.Amount} kr";
     }
 }
