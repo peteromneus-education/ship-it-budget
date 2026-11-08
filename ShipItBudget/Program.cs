@@ -14,7 +14,7 @@ namespace ShipItBudget
     {
         static void Main(string[] args)
         {
-            // Skapa DataStore för Transaction
+            
             DataStore<Transaction> transactionStore = new DataStore<Transaction>();
 
             // Kontrollera tom lista
