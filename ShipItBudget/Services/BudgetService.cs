@@ -94,6 +94,17 @@ public class BudgetService
         }
         return null; 
     }
+    public string? RemoveBudget(int month, int year)
+    {
+        MonthlyBudget? budget = GetBudget(month, year);
+        if (budget == null)
+        {
+            return "Hittade ingen budget att ta bort ";
+        }
+
+        monthlyBudgets.Remove(budget);
+        return null; 
+    }
 
 
 }
