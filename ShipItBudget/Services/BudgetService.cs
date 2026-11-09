@@ -1,5 +1,6 @@
 public class BudgetService
 {
+    private List<MonthlyBudget> monthlyBudgets = new List<MonthlyBudget>();
     private List<Transaction> transactions = new List<Transaction>();
     //JASON ?
 
@@ -53,4 +54,79 @@ public class BudgetService
         transactions.Add(newtransaction);
         return true;
     }
+    public string? AddBudget(int month, int year, decimal limit)
+    {
+        string? FelMeddelande = MonthlyBudget.IsValid(month, year, limit); // Använder IsValid, får ur rätt fel beroende på felet
+        if(FelMeddelande != null)
+        {
+            return FelMeddelande;
+        }
+
+        bool exits = monthlyBudgets.Any(budget => budget.Month == month && budget.Year == year); //kollar iaf de finns en budget redan
+        if(exits)
+        {
+            return "Det finns redan en budget för den här månaden";
+        }
+
+        MonthlyBudget nyBudget = new MonthlyBudget(month, year, limit); // skapa nytt obejekt
+        monthlyBudgets.Add(nyBudget); // lägger till
+        return null;
+    }
+    public MonthlyBudget? GetBudget(int month, int year) // metod för att hämta rätt budget, kommer retunera null ifall den ej hittas
+    {
+        return monthlyBudgets.FirstOrDefault(budget => budget.Month == month && budget.Year == year);
+    }
+    public string? UpdateMonthlyBudget(int month, int year, decimal newlimit)// metod för att uppdatera Budgeten obs ändast gränsen
+    {
+        MonthlyBudget ? budget = GetBudget(month, year); // Använder getmetoden ifall jag får null så hittar den ej
+        if(budget == null)
+        {
+            return "Hitttade ingen Budget för den månaden";
+        }
+        string? felMeddelande = budget.Update(newlimit); // använder update metoden från MonlyBudget klassen 
+        if (felMeddelande != null)
+        {
+        return felMeddelande; // få tillbaka felet
+        }
+        return null; 
+    }
+    public string? RemoveBudget(int month, int year)
+    {
+        MonthlyBudget? budget = GetBudget(month, year);
+        if (budget == null)
+        {
+            return "Hittade ingen budget att ta bort ";
+        }
+
+        monthlyBudgets.Remove(budget);
+        return null; 
+    }
+    public decimal GetTotalincome(int month, int year)// Hitta rätt månad och summera inkomsterna 
+    {
+    return transactions.Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount); // t för transaction
+    }
+    public decimal GetTotalexpense(int month, int year)// Hitta rätt månad och summera utgifterna 
+    {
+    return transactions.Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
+    }
+    public decimal GetIncomeDay(int day, int month, int year) // hitta rätt dag och summeera inkomsterna
+    {
+    return transactions.Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount);
+    }
+    public decimal GetExpenseDay(int day, int month, int year) // hitta rätt dag och summeera utgifterna
+    {
+    return transactions.Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount);
+    }
+
+    public decimal ? GetRemainingbudget(int month, int year) // ? kan va null
+    {
+        MonthlyBudget? budget = GetBudget(month, year);
+        if (budget == null) // om man inte hitta någon budget
+        {
+            return null;
+        }
+        decimal Expenses = GetTotalexpense(month, year);
+        return budget.Limit - Expenses; // kan bli negativt tal
+    }
+
 }
