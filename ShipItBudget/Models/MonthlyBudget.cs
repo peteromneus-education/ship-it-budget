@@ -1,21 +1,7 @@
 using System;
 
 // Beskriver månadens utgiftsgräns. Year och Month identifierar budgeten; utfallet beräknas från transaktionerna.
-/* Låt tjänsten hantera en total utgiftsgräns per månad och beräkna utfallet.
 
-Klart när
-
-En månadsbudget kan skapas, hämtas, ändras och tas bort enligt det överenskomna kontraktet.
-
-År och månad identifierar budgeten; samma månad kan inte få dubbla budgetar.
-
-Budgetgränsen kan vara noll men inte negativ, och månaden måste vara giltig.
-
-Inkomster och utgifter summeras separat för en vald dag och månad med LINQ.
-
-Återstående budget beräknas som utgiftsgräns minus månadens utgifter och kan vara negativ.
-
-Avsaknad av budget skiljs från en budget på noll; beräknade summor lagras inte som extra modellfält. */
 public class MonthlyBudget
 {
     public int Month {get; private set;}
