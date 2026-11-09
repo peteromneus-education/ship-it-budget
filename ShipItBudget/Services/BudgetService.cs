@@ -113,6 +113,24 @@ public class BudgetService
     {
     return transactions.Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
     }
-    
+    public decimal GetIncomeDay(int day, int month, int year) // hitta rätt dag och summeera inkomsterna
+    {
+    return transactions.Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount);
+    }
+    public decimal GetExpenseDay(int day, int month, int year) // hitta rätt dag och summeera utgifterna
+    {
+    return transactions.Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount);
+    }
+
+    public decimal ? GetRemainingbudget(int month, int year) // ? kan va null
+    {
+        MonthlyBudget? budget = GetBudget(month, year);
+        if (budget == null) // om man inte hitta någon budget
+        {
+            return null;
+        }
+        decimal Expenses = GetTotalexpense(month, year);
+        return budget.Limit - Expenses; // kan bli negativt tal
+    }
 
 }
