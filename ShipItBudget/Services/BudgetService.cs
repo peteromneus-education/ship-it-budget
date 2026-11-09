@@ -105,6 +105,14 @@ public class BudgetService
         monthlyBudgets.Remove(budget);
         return null; 
     }
-
+    public decimal GetTotalincome(int month, int year)// Hitta rätt månad och summera inkomsterna 
+    {
+    return transactions.Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount); // t för transaction
+    }
+    public decimal GetTotalexpense(int month, int year)// Hitta rätt månad och summera utgifterna 
+    {
+    return transactions.Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
+    }
+    
 
 }
