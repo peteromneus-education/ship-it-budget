@@ -123,7 +123,7 @@ public class CalendarView
             {
                 DateTime cellDate = new(selectedDate.Year, selectedDate.Month, dayOfMonth);
 
-                List<Transaction> transactionsForCellDate = budgetService.GettransactionbyDate(cellDate);
+                List<Transaction> transactionsForCellDate = budgetService.GetTransactionbyDate(cellDate);
 
                 List<Transaction> incomeForCellDate = transactionsForCellDate
                     .Where(transaction => transaction.Type == TransactionType.Income)

@@ -2,7 +2,9 @@
 
 using ShipItBudget.UI;
 
-BudgetService budgetService = new BudgetService();
+DataStore dataStore = new DataStore();
+
+BudgetService budgetService = new BudgetService(dataStore);
 
 MainMenu mainMenu = new MainMenu(budgetService);
 mainMenu.Show();
