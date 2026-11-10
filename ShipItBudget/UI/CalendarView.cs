@@ -6,33 +6,16 @@ namespace ShipItBudget.UI;
 
 public class CalendarView
 {
+    private readonly BudgetService budgetService;
+
+    public CalendarView(BudgetService budgetService)
+    {
+        this.budgetService = budgetService;
+    }
+
     public void Show() // Visar kalendern och hanterar datumval med piltangenter. Avslutar Live Display innan DayMenu öppnas.
     {
         DateTime selectedDate = DateTime.Today;
-
-        //// Skapa exempeldata för demonstration/test med hjälp av klassen ExampleTransaction.
-        List<ExampleTransaction> exampleTransactions =
-        [
-            new ExampleTransaction
-            {
-                Date = DateTime.Today,
-                Amount = 500m,
-                IsIncome = true
-            },
-            new ExampleTransaction
-            {
-                Date = DateTime.Today.AddDays(1),
-                Amount = 100m,
-                IsIncome = false
-            },
-            new ExampleTransaction
-            {
-                Date = DateTime.Today,
-                Amount = 200m,
-                IsIncome = true
-            },
-        ];
-        ////
 
         bool keepCalendarOpen = true;
 
@@ -89,12 +72,10 @@ public class CalendarView
                 }
             });
 
-            if (shouldOpenDayMenu) // Om användaren tryckte på Enter, öppna DayMenu för valt datum och skicka med transaktionerna för det datumet
+            if (shouldOpenDayMenu) // Om användaren tryckte på Enter, öppna DayMenu för valt datum
             {
-                List<ExampleTransaction> transactionsForSelectedDate = exampleTransactions
-                    .Where(transaction => transaction.Date.Date == selectedDate.Date)
-                    .ToList();
-                DayMenu.Show(selectedDate, transactionsForSelectedDate);
+                DayMenu dayMenu = new DayMenu(budgetService);
+                dayMenu.Show(selectedDate);
             }
         }
 
@@ -106,8 +87,7 @@ public class CalendarView
 
             calendarTable.Title(selectedDate.ToString("yyyy-MM-dd"));
             calendarTable.Caption(
-                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa detaljer | Esc: Avsluta\n" +
-                "EXEMPELDATA – tillfälliga belopp[/]");
+                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa detaljer | Esc: Avsluta[/]");
             calendarTable.ShowRowSeparators();
 
             calendarTable.AddColumn("Måndag");
@@ -121,7 +101,7 @@ public class CalendarView
             foreach (TableColumn weekdayColumn in calendarTable.Columns)
             {
                 weekdayColumn.Width = 14;
-                weekdayColumn.Padding = new Padding(0, 0, 0, 0);
+                weekdayColumn.Padding = new Padding(0, 0, 0, 0); // Sätter padding för kolumnerna i kalendern till 0 för att undvika extra utrymme mellan cellerna.
             }
 
             Array.Fill(weekCells, ""); // Fyller arrayen med tomma strängar för att representera tomma celler i kalendern.
@@ -143,44 +123,42 @@ public class CalendarView
             {
                 DateTime cellDate = new(selectedDate.Year, selectedDate.Month, dayOfMonth);
 
-                List<ExampleTransaction> transactionsForCellDate = exampleTransactions
-                    .Where(transaction => transaction.Date.Date == cellDate.Date)
+                List<Transaction> transactionsForCellDate = budgetService.GetTransactionbyDate(cellDate);
+
+                List<Transaction> incomeForCellDate = transactionsForCellDate
+                    .Where(transaction => transaction.Type == TransactionType.Income)
                     .ToList();
 
-                List<ExampleTransaction> incomeForCellDate = transactionsForCellDate
-                    .Where(transaction => transaction.IsIncome)
+                List<Transaction> expenseForCellDate = transactionsForCellDate
+                    .Where(transaction => transaction.Type == TransactionType.Expense)
                     .ToList();
 
-                List<ExampleTransaction> expenseForCellDate = transactionsForCellDate
-                    .Where(transaction => transaction.IsIncome == false)
-                    .ToList();
-
-                decimal? exampleIncomeTotal = null;
-                decimal? exampleExpenseTotal = null;
+                decimal? incomeTotal = null;
+                decimal? expenseTotal = null;
 
                 if (incomeForCellDate.Count > 0)
                 {
-                    exampleIncomeTotal = incomeForCellDate.Sum(
+                    incomeTotal = incomeForCellDate.Sum(
                         transaction => transaction.Amount);
                 }
 
                 if (expenseForCellDate.Count > 0)
                 {
-                    exampleExpenseTotal = expenseForCellDate.Sum(
+                    expenseTotal = expenseForCellDate.Sum(
                         transaction => transaction.Amount);
                 }
 
                 string incomeSummaryText = string.Empty;
                 string expenseSummaryText = string.Empty;
 
-                if (exampleIncomeTotal != null)
+                if (incomeTotal != null)
                 {
-                    incomeSummaryText = $"[green]+ {exampleIncomeTotal} kr[/]";
+                    incomeSummaryText = $"[green]+ {incomeTotal} kr[/]";
                 }
 
-                if (exampleExpenseTotal != null)
+                if (expenseTotal != null)
                 {
-                    expenseSummaryText = $"[red]- {exampleExpenseTotal} kr[/]";
+                    expenseSummaryText = $"[red]- {expenseTotal} kr[/]";
                 }
 
                 string dayNumberText = dayOfMonth.ToString();
@@ -196,21 +174,21 @@ public class CalendarView
                     string selectedIncomeLine = string.Empty;
                     string selectedExpenseLine = string.Empty;
 
-                    if (exampleIncomeTotal != null)
+                    if (incomeTotal != null)
                     {
-                        selectedIncomeLine = $"+ {exampleIncomeTotal} kr";
+                        selectedIncomeLine = $"+ {incomeTotal} kr";
                     }
 
-                    if (exampleExpenseTotal != null)
+                    if (expenseTotal != null)
                     {
-                        selectedExpenseLine = $"- {exampleExpenseTotal} kr";
+                        selectedExpenseLine = $"- {expenseTotal} kr";
                     }
 
                     selectedIncomeLine = selectedIncomeLine.PadRight(14);
                     selectedExpenseLine = selectedExpenseLine.PadRight(14);
 
                     weekCells[weekdayColumnIndex] =
-                        $"[black on green]{selectedDayLine}\n" +
+                        $"[black on violet]{selectedDayLine}\n" +
                         $"[black]{selectedIncomeLine}[/]\n" +
                         $"[black]{selectedExpenseLine}[/][/]";
                 }
