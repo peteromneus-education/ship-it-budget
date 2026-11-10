@@ -22,7 +22,7 @@ namespace ShipItBudget.UI
             string category = AskCategory(null);
             DateTime date = AskDate(formDate);
 
-            bool success = budgetService.AddTransaction(amount, type, category, date);
+            bool success = budgetService.AddTransaction(amount, type, category, date) == ServiceResult.Success;
             ShowResult(success, "Transaktion tillagd!", "Fel vid tillägg av transaktion!");
         }
 
@@ -37,9 +37,9 @@ namespace ShipItBudget.UI
             string category = AskCategory(transaction.Category);
             DateTime date = AskDate(transaction.Date);
 
-            string? error = budgetService.UpdateTransaction(transaction.Id, amount, type, date, category);
+            bool success = budgetService.UpdateTransaction(transaction.Id, amount, type, date, category) == ServiceResult.Success;
 
-            ShowResult(error == null, "Transaktion uppdaterad!", error ?? "");
+            ShowResult(success, "Transaktion uppdaterad!", "Fel vid uppdatering av transaktion!"); //Ge olika text beroende om de e true elr false på Success
         }
 
         private decimal AskAmount(decimal? currentAmount)

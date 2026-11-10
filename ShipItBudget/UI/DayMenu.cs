@@ -21,7 +21,7 @@ public class DayMenu
         {
             Console.Clear();
 
-            List<Transaction> transactionsForSelectedDate = budgetService.GettransactionbyDate(selectedDate);
+            List<Transaction> transactionsForSelectedDate = budgetService.GetTransactionbyDate(selectedDate);
 
             Table transactionsTable = new();
             transactionsTable.Title($"Transaktioner för {selectedDate:yyyy-MM-dd}");
@@ -90,7 +90,7 @@ public class DayMenu
 
                     if (ConfirmDelete(transactionToDelete))
                     {
-                        bool deleted = budgetService.DeleteTransaction(transactionToDelete.Id);
+                        bool deleted = budgetService.DeleteTransaction(transactionToDelete.Id) == ServiceResult.Success;
 
                         if (deleted)
                         {
