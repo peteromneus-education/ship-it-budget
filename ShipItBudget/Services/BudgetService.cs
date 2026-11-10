@@ -1,3 +1,10 @@
+public enum ServiceResult
+{
+    Success,
+    NotFound,
+    InValidInput,
+    AlreadyExist
+}
 public class BudgetService
 {
     private List<MonthlyBudget> monthlyBudgets = new List<MonthlyBudget>();
