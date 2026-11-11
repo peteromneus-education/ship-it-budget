@@ -12,33 +12,34 @@ public class BudgetService
 
     public BudgetService(DataStore dataStore)// Konstruktorn
     {
-        _dataStore = dataStore;
+        _transactionStore = transactionStore;
+        _budgetStore = budgetStore;
     }
 
     public List<Transaction> GetSortedbyDate() //metod som sotera efter datumet
     {
-        return _dataStore.Transactions.OrderByDescending(transaction => transaction.Date).ToList();
+        return _transactionStore.GetAll().OrderByDescending(transaction => transaction.Date).ToList();
     }
 
     public List<Transaction> GetTransactionbyDate(DateTime ChoosenDate) // metod som hittar transaktioner efter ett visst datum
     {
-        return _dataStore.Transactions.Where(transaction => transaction.Date.Date == ChoosenDate.Date).ToList(); //Date.Date så man bar få datum
+        return _transactionStore.GetAll().Where(transaction => transaction.Date.Date == ChoosenDate.Date).ToList(); //Date.Date så man bar få datum
     }
 
     public ServiceResult DeleteTransaction(Guid Id) //metod för att ta bort transaction
     {
-        var transaction = _dataStore.Transactions.FirstOrDefault(transaction => transaction.Id == Id); //letar upp rätt Id 
+        var transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == Id); //letar upp rätt Id 
         if (transaction == null)
         {
             return ServiceResult.NotFound;
         }
-        _dataStore.Transactions.Remove(transaction);
+        _transactionStore.RemoveItem(transaction);
         return ServiceResult.Success;
     }
 
     public ServiceResult UpdateTransaction(Guid Id, decimal newamount, TransactionType newType, DateTime newDate, string newcategory) //string? så man kan sriva i retrun
     {
-        var transaction = _dataStore.Transactions.FirstOrDefault(transaction => transaction.Id == Id); //samma princip som Deleate metoden
+        var transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == Id); //samma princip som Deleate metoden
         if (transaction == null)
         {
             return ServiceResult.NotFound;
@@ -62,7 +63,7 @@ public class BudgetService
 
         Transaction newtransaction = new Transaction(amount, type, category, date ?? DateTime.Now);//Nytt obejekt, konstrukton sätter id och datum om inget annat anges
 
-        _dataStore.Transactions.Add(newtransaction);
+        _transactionStore.AddItem(newtransaction);
         return ServiceResult.Success;
     }
 
@@ -81,13 +82,13 @@ public class BudgetService
         }
 
         MonthlyBudget nyBudget = new MonthlyBudget(month, year, limit); // skapa nytt obejekt
-        _dataStore.MonthlyBudgets.Add(nyBudget); // lägger till
+        _budgetStore.AddItem(nyBudget); // lägger till
         return ServiceResult.Success;
     }
 
     public MonthlyBudget? GetBudget(int month, int year) // metod för att hämta rätt budget, kommer retunera null ifall den ej hittas
     {
-        return _dataStore.MonthlyBudgets.FirstOrDefault(budget => budget.Month == month && budget.Year == year);
+        return _budgetStore.GetAll().FirstOrDefault(budget => budget.Month == month && budget.Year == year);
     }
     public ServiceResult UpdateMonthlyBudget(int month, int year, decimal newlimit)// metod för att uppdatera Budgeten obs ändast gränsen
     {
