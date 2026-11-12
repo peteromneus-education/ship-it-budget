@@ -82,7 +82,7 @@ public class CalendarView
         Table BuildCalendarTable() // Bygger kalendervyn med hjälp av Spectre.Console.Table och returnerar den som en Table-objekt.
         {
             string[] weekCells = new string[7]; // Skapar en array med 7 celler för att representera en vecka i kalendern.
-            
+
             Table calendarTable = new();
 
             calendarTable
