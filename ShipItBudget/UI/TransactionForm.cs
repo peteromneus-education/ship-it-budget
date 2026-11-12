@@ -19,7 +19,7 @@ namespace ShipItBudget.UI
 
             decimal amount = AskAmount(null);
             TransactionType type = AskType(null);
-            string category = AskCategory(null);
+            string category = AskCategory(null, type);
             DateTime date = AskDate(formDate);
 
             bool success = budgetService.AddTransaction(amount, type, category, date) == ServiceResult.Success;
@@ -34,7 +34,7 @@ namespace ShipItBudget.UI
 
             decimal amount = AskAmount(transaction.Amount);
             TransactionType type = AskType(transaction.Type);
-            string category = AskCategory(transaction.Category);
+            string category = AskCategory(transaction.Category, type);
             DateTime date = AskDate(transaction.Date);
 
             bool success = budgetService.UpdateTransaction(transaction.Id, amount, type, date, category) == ServiceResult.Success;
@@ -74,24 +74,28 @@ namespace ShipItBudget.UI
                 prompt.DefaultValue(currentType.Value);
             }
 
-            return AnsiConsole.Prompt(prompt);
+            TransactionType chosenType = AnsiConsole.Prompt(prompt);
+            AnsiConsole.MarkupLine($"Typ: {TransactionTypeText.DisplayText(chosenType)}");
+            return chosenType;
         }
 
-        private string AskCategory(string? currentCategory)
+        private string AskCategory(string? currentCategory, TransactionType type)
         {
             SelectionPrompt<string> prompt = new SelectionPrompt<string>()
                 .Title("Välj kategori:")
                 .WrapAround()
                 .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
                 .UseConverter(Markup.Escape)
-                .AddChoices("Boende", "Mat", "Transport", "Underhållning");
+                .AddChoices(type == TransactionType.Income ? Categories.Income : Categories.Expense);
 
             if (currentCategory != null)
             {
                 prompt.DefaultValue(currentCategory);
             }
 
-            return AnsiConsole.Prompt(prompt);
+            string chosenCategory = AnsiConsole.Prompt(prompt);
+            AnsiConsole.MarkupLine($"Kategori: {Markup.Escape(chosenCategory)}");
+            return chosenCategory;
         }
 
         private DateTime AskDate(DateTime defaultDate)
