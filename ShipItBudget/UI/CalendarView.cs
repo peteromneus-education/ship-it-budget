@@ -82,12 +82,12 @@ public class CalendarView
         Table BuildCalendarTable() // Bygger kalendervyn med hjälp av Spectre.Console.Table och returnerar den som en Table-objekt.
         {
             string[] weekCells = new string[7]; // Skapar en array med 7 celler för att representera en vecka i kalendern.
-            
+
             Table calendarTable = new();
 
             calendarTable.Title(selectedDate.ToString("yyyy-MM-dd"));
             calendarTable.Caption(
-                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa detaljer | Esc: Avsluta[/]");
+                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa/redigera | Esc: Tillbaka[/]");
             calendarTable.ShowRowSeparators();
 
             calendarTable.AddColumn("Måndag");

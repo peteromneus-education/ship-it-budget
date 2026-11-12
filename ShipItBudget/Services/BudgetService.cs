@@ -17,7 +17,7 @@ public class BudgetService
         _transactionStore = transactionStore;
         _budgetStore = budgetStore;
     }
-    
+
 
     public List<Transaction> GetSortedbyDate() //metod som sotera efter datumet
     {
@@ -72,13 +72,13 @@ public class BudgetService
     public ServiceResult AddBudget(int month, int year, decimal limit)
     {
         string? FelMeddelande = MonthlyBudget.IsValid(month, year, limit); // Använder IsValid, får ur rätt fel beroende på felet
-        if(FelMeddelande != null)
+        if (FelMeddelande != null)
         {
             return ServiceResult.InValidInput;
         }
 
         bool exits = _budgetStore.GetAll().Any(budget => budget.Month == month && budget.Year == year); //kollar iaf de finns en budget redan
-        if(exits)
+        if (exits)
         {
             return ServiceResult.AlreadyExist;
         }
@@ -94,16 +94,16 @@ public class BudgetService
     public ServiceResult UpdateMonthlyBudget(int month, int year, decimal newlimit)// metod för att uppdatera Budgeten obs ändast gränsen
     {
         MonthlyBudget? budget = GetBudget(month, year); // Använder getmetoden ifall jag får null så hittar den ej
-        if(budget == null)
+        if (budget == null)
         {
             return ServiceResult.NotFound;
         }
         string? felMeddelande = budget.Update(newlimit); // använder update metoden från MonlyBudget klassen 
         if (felMeddelande != null)
         {
-        return ServiceResult.InValidInput; // få tillbaka felet
+            return ServiceResult.InValidInput; // få tillbaka felet
         }
-        return ServiceResult.Success; 
+        return ServiceResult.Success;
     }
     public ServiceResult RemoveBudget(int month, int year)
     {
@@ -114,26 +114,34 @@ public class BudgetService
         }
 
         _budgetStore.RemoveItem(budget);
-        return ServiceResult.Success; 
+        return ServiceResult.Success;
     }
     public decimal GetTotalincome(int month, int year)// Hitta rätt månad och summera inkomsterna 
     {
-    return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount); // t för transaction
+        return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount); // t för transaction
     }
     public decimal GetTotalexpense(int month, int year)// Hitta rätt månad och summera utgifterna 
     {
-    return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
+        return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
+    }
+    public Dictionary<string, decimal> GetExpenseTotalsByCategory(int month, int year)
+    {
+        return _transactionStore.GetAll()
+            .Where(transaction => transaction.Date.Month == month && transaction.Date.Year == year && transaction.Type == TransactionType.Expense)
+            .GroupBy(transaction => transaction.Category)
+            .ToDictionary(group => group.Key,
+            group => group.Sum(transaction => transaction.Amount));
     }
     public decimal GetIncomeDay(int day, int month, int year) // hitta rätt dag och summeera inkomsterna
     {
-    return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount);
+        return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount);
     }
     public decimal GetExpenseDay(int day, int month, int year) // hitta rätt dag och summeera utgifterna
     {
-    return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount);
+        return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount);
     }
 
-    public decimal ? GetRemainingBudget(int month, int year) // ? kan va null
+    public decimal? GetRemainingBudget(int month, int year) // ? kan va null
     {
         MonthlyBudget? budget = GetBudget(month, year);
         if (budget == null) // om man inte hitta någon budget
