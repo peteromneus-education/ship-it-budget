@@ -82,26 +82,28 @@ public class CalendarView
         Table BuildCalendarTable() // Bygger kalendervyn med hjälp av Spectre.Console.Table och returnerar den som en Table-objekt.
         {
             string[] weekCells = new string[7]; // Skapar en array med 7 celler för att representera en vecka i kalendern.
-            
+
             Table calendarTable = new();
 
-            calendarTable.Title(selectedDate.ToString("yyyy-MM-dd"));
-            calendarTable.Caption(
-                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa detaljer | Esc: Avsluta[/]");
-            calendarTable.ShowRowSeparators();
+            calendarTable
+                .Title(selectedDate.ToString("yyyy-MM-dd"))
+                .Caption(
+                "[grey]Piltangenter: Byt dag | PageUp/PageDown: Byt månad | Enter: Visa/redigera | Esc: Tillbaka[/]")
+                .ShowRowSeparators()
+                .DoubleEdgeBorder()
 
-            calendarTable.AddColumn("Måndag");
-            calendarTable.AddColumn("Tisdag");
-            calendarTable.AddColumn("Onsdag");
-            calendarTable.AddColumn("Torsdag");
-            calendarTable.AddColumn("Fredag");
-            calendarTable.AddColumn("Lördag");
-            calendarTable.AddColumn("Söndag");
+                .AddColumn("Måndag")
+                .AddColumn("Tisdag")
+                .AddColumn("Onsdag")
+                .AddColumn("Torsdag")
+                .AddColumn("Fredag")
+                .AddColumn("Lördag")
+                .AddColumn("Söndag");
 
             foreach (TableColumn weekdayColumn in calendarTable.Columns)
             {
-                weekdayColumn.Width = 14;
-                weekdayColumn.Padding = new Padding(0, 0, 0, 0); // Sätter padding för kolumnerna i kalendern till 0 för att undvika extra utrymme mellan cellerna.
+                weekdayColumn.Width = 12;
+                weekdayColumn.Padding = new Padding(0, 0); // Sätter padding för kolumnerna i kalendern till 0 för att undvika extra utrymme mellan cellerna.
             }
 
             Array.Fill(weekCells, ""); // Fyller arrayen med tomma strängar för att representera tomma celler i kalendern.
@@ -170,27 +172,10 @@ public class CalendarView
 
                 if (dayOfMonth == selectedDate.Day)
                 {
-                    string selectedDayLine = dayOfMonth.ToString().PadRight(14);
-                    string selectedIncomeLine = string.Empty;
-                    string selectedExpenseLine = string.Empty;
-
-                    if (incomeTotal != null)
-                    {
-                        selectedIncomeLine = $"+ {incomeTotal} kr";
-                    }
-
-                    if (expenseTotal != null)
-                    {
-                        selectedExpenseLine = $"- {expenseTotal} kr";
-                    }
-
-                    selectedIncomeLine = selectedIncomeLine.PadRight(14);
-                    selectedExpenseLine = selectedExpenseLine.PadRight(14);
-
                     weekCells[weekdayColumnIndex] =
-                        $"[black on violet]{selectedDayLine}\n" +
-                        $"[black]{selectedIncomeLine}[/]\n" +
-                        $"[black]{selectedExpenseLine}[/][/]";
+                        $"[black on violet]{dayOfMonth}[/] ◀\n" +
+                        $"{incomeSummaryText}\n" +
+                        $"{expenseSummaryText}";
                 }
                 else
                 {

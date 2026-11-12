@@ -1,6 +1,8 @@
-﻿// Kopplar ihop lagring, logik och UI.
+// Kopplar ihop lagring, logik och UI.
 using ShipItBudget;
 using ShipItBudget.UI;
+
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 string storageFolder = Path.Combine(AppContext.BaseDirectory, "Storage");
 string transactionsPath = Path.Combine(storageFolder, "transactions.json");

@@ -107,6 +107,7 @@ public class DayMenu
 
                 case "Tillbaka":
                     keepDisplayingTable = false;
+                    Console.Clear();
                     break;
             }
         }
