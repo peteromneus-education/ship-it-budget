@@ -11,6 +11,8 @@ public static class JsonFileStorage
             WriteIndented = true
         };
 
+        // Skapar mappen om den inte finns, annars får vi undantag när vi försöker skriva filen.
+        Directory.CreateDirectory(Path.GetDirectoryName(jsonFilePath)!);
         string json = JsonSerializer.Serialize(data, jsonOptions);
         File.WriteAllText(jsonFilePath, json);
     }
