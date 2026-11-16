@@ -40,6 +40,7 @@ namespace ShipItBudget.UI
                 $"Utgifter: {totalExpense} kr\n" +
                 $"Återstående budget: {remainingText}"))
                 .Header("Statistik")
+                .RoundedBorder()
                 .BorderColor(Color.SkyBlue1)
                 .Padding(2, 1);
 
@@ -69,6 +70,7 @@ namespace ShipItBudget.UI
 
             panelChart
                 .Header("Utgifter per kategori")
+                .RoundedBorder()
                 .BorderColor(Color.Gold1)
                 .Padding(2, 1);
 
@@ -83,7 +85,7 @@ namespace ShipItBudget.UI
 
             Rule separatorRule = new Rule()
                 .LeftJustified()
-                .RuleStyle(new Style(Color.CadetBlue));
+                .RuleStyle(new Style(Color.Gray));
 
             while (keepMainMenuOpen)
             {
@@ -91,7 +93,7 @@ namespace ShipItBudget.UI
 
                 Rule headerRule = new Rule($"[yellow]{today:Y}[/]")
                     .LeftJustified()
-                    .RuleStyle(new Style(Color.CadetBlue));
+                    .RuleStyle(new Style(Color.Gray));
 
                 Console.Clear();
                 AnsiConsole.Write(headerRule);
@@ -104,35 +106,26 @@ namespace ShipItBudget.UI
         new SelectionPrompt<string>()
             .Title("")
             .WrapAround()
-            .HighlightStyle(new Style(Color.Yellow, Color.Black))
+            .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
+            .AddChoices("Visa kalendern")
             .AddChoices("Ny transaktion")
-            .AddChoiceGroup("Visa kalendern")
-            .AddChoiceGroup("Redigering", new[]
-            {
-            "Redigera transaktion",
-            "Redigera budget"
-            })
+            .AddChoices("Lägg till/redigera budget")
             .AddChoices("Avsluta programmet"));
 
                 switch (choice)
                 {
-                    case "Ny transaktion":
-                        TransactionForm transactionForm = new TransactionForm(budgetService);
-                        transactionForm.ShowAdd(DateTime.Today);
-                        break;
-
                     case "Visa kalendern":
                         CalendarView calendarView = new CalendarView(budgetService);
                         Console.Clear();
                         calendarView.Show();
                         break;
 
-                    case "Redigera transaktion":
-                        AnsiConsole.MarkupLine("[yellow]Funktionen är inte implementerad än.[/]");
-                        Console.ReadKey(true);
+                    case "Ny transaktion":
+                        TransactionForm transactionForm = new TransactionForm(budgetService);
+                        transactionForm.ShowAdd(DateTime.Today);
                         break;
 
-                    case "Redigera budget":
+                    case "Lägg till/redigera budget":
                         new BudgetForm(budgetService).Show(DateTime.Today);
                         break;
 

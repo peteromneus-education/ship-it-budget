@@ -17,6 +17,8 @@ BudgetService budgetService = new BudgetService(transactionStore, budgetStore);
 transactionStore.LoadFromJson();
 budgetStore.LoadFromJson();
 
+WelcomeScreen.Show();
+
 MainMenu mainMenu = new MainMenu(budgetService);
 mainMenu.Show();
 

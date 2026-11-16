@@ -15,7 +15,7 @@ namespace ShipItBudget.UI
         public void ShowAdd(DateTime formDate)
         {
             Console.Clear();
-            Console.WriteLine("LÄGG TILL NY TRANSAKTION\n");
+            AnsiConsole.MarkupLine("[bold yellow]LÄGG TILL NY TRANSAKTION[/]\n");
 
             decimal amount = AskAmount(null);
             TransactionType type = AskType(null);
@@ -29,7 +29,7 @@ namespace ShipItBudget.UI
         public void ShowEdit(Transaction transaction)
         {
             Console.Clear();
-            Console.WriteLine("REDIGERA TRANSAKTION\n");
+            AnsiConsole.MarkupLine("[bold yellow]REDIGERA TRANSAKTION[/]\n");
             AnsiConsole.MarkupLine("[grey]Tryck Enter för att behålla nuvarande värde.[/]\n");
 
             decimal amount = AskAmount(transaction.Amount);
@@ -65,7 +65,7 @@ namespace ShipItBudget.UI
             SelectionPrompt<TransactionType> prompt = new SelectionPrompt<TransactionType>()
                 .Title("Välj typ:")
                 .WrapAround()
-                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+                .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
                 .UseConverter(TransactionTypeText.DisplayText)
                 .AddChoices(TransactionType.Income, TransactionType.Expense);
 
@@ -84,7 +84,7 @@ namespace ShipItBudget.UI
             SelectionPrompt<string> prompt = new SelectionPrompt<string>()
                 .Title("Välj kategori:")
                 .WrapAround()
-                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+                .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
                 .UseConverter(Markup.Escape)
                 .AddChoices(type == TransactionType.Income ? Categories.Income : Categories.Expense);
 
