@@ -11,11 +11,13 @@ public class BudgetService
 {
     private readonly DataStore<Transaction> _transactionStore;
     private readonly DataStore<MonthlyBudget> _budgetStore;
+    private readonly Logger _logger;
 
-    public BudgetService(DataStore<Transaction> transactionStore, DataStore<MonthlyBudget> budgetStore)
+    public BudgetService(DataStore<Transaction> transactionStore, DataStore<MonthlyBudget> budgetStore, Logger logger)
     {
         _transactionStore = transactionStore;
         _budgetStore = budgetStore;
+        _logger = logger;
     }
 
 
@@ -37,6 +39,7 @@ public class BudgetService
             return ServiceResult.NotFound;
         }
         _transactionStore.RemoveItem(transaction);
+        _logger.Info(LogEvent.TransactionDeleted, $"Transaktion {Id} borttagen: {transaction.Type}, {transaction.Amount} kr, {transaction.Category}, {transaction.Date:yyyy-MM-dd}");
         return ServiceResult.Success;
     }
 
@@ -51,8 +54,10 @@ public class BudgetService
         {
             return ServiceResult.InValidInput;
         }
-        //Sätter de nya väderna genom Uptade metoden från Transaction klassen
+
+        string before = $"{transaction.Type}, {transaction.Amount} kr, {transaction.Category}, {transaction.Date:yyyy-MM-dd}";
         transaction.Update(newamount, newType, newDate, newcategory);
+        _logger.Info(LogEvent.TransactionUpdated, $"Transaktion {Id} ändrad: {before} → {newType}, {newamount} kr, {newcategory}, {newDate:yyyy-MM-dd}");
 
         return ServiceResult.Success;
     }
@@ -67,6 +72,7 @@ public class BudgetService
         Transaction newtransaction = new Transaction(amount, type, category, date ?? DateTime.Now);//Nytt obejekt, konstrukton sätter id och datum om inget annat anges
 
         _transactionStore.AddItem(newtransaction);
+        _logger.Info(LogEvent.TransactionAdded, $"Transaktion {newtransaction.Id} tillagd: {newtransaction.Type}, {newtransaction.Amount} kr, {newtransaction.Category}, {newtransaction.Date:yyyy-MM-dd}");
         return ServiceResult.Success;
     }
     public ServiceResult AddBudget(int month, int year, decimal limit)
@@ -85,6 +91,7 @@ public class BudgetService
 
         MonthlyBudget nyBudget = new MonthlyBudget(month, year, limit); // skapa nytt obejekt
         _budgetStore.AddItem(nyBudget); // lägger till
+        _logger.Info(LogEvent.BudgetAdded, $"Budget {year}-{month:00} tillagd: {limit} kr");
         return ServiceResult.Success;
     }
     public MonthlyBudget? GetBudget(int month, int year) // metod för att hämta rätt budget, kommer retunera null ifall den ej hittas
@@ -98,11 +105,13 @@ public class BudgetService
         {
             return ServiceResult.NotFound;
         }
-        string? felMeddelande = budget.Update(newlimit); // använder update metoden från MonlyBudget klassen 
+        decimal oldLimit = budget.Limit;
+        string? felMeddelande = budget.Update(newlimit);
         if (felMeddelande != null)
         {
-            return ServiceResult.InValidInput; // få tillbaka felet
+            return ServiceResult.InValidInput;
         }
+        _logger.Info(LogEvent.BudgetUpdated, $"Budget {year}-{month:00} ändrad: {oldLimit} kr → {newlimit} kr");
         return ServiceResult.Success;
     }
     public ServiceResult RemoveBudget(int month, int year)
@@ -114,6 +123,7 @@ public class BudgetService
         }
 
         _budgetStore.RemoveItem(budget);
+        _logger.Info(LogEvent.BudgetRemoved, $"Budget {year}-{month:00} borttagen: {budget.Limit} kr");
         return ServiceResult.Success;
     }
     public decimal GetTotalincome(int month, int year)// Hitta rätt månad och summera inkomsterna 

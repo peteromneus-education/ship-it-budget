@@ -11,7 +11,23 @@ string budgetsPath = Path.Combine(storageFolder, "budgets.json");
 DataStore<Transaction> transactionStore = new(transactionsPath);
 DataStore<MonthlyBudget> budgetStore = new(budgetsPath);
 
-BudgetService budgetService = new BudgetService(transactionStore, budgetStore);
+// Loggen skapas först, så att fel vid inläsningen kan loggas.
+string logPath = Path.Combine(storageFolder, "log.json");
+DataStore<LogEntry> logStore = new(logPath);
+logStore.LoadFromJson();
+Logger logger = new Logger(logStore);
+
+BudgetService budgetService = new BudgetService(transactionStore, budgetStore, logger);
+
+// Ladda data från JSON-filerna innan programmet startar.
+if (!transactionStore.LoadFromJson())
+{
+    logger.Error(LogEvent.LoadFailed, $"Kunde inte läsa {transactionsPath}");
+}
+if (!budgetStore.LoadFromJson())
+{
+    logger.Error(LogEvent.LoadFailed, $"Kunde inte läsa {budgetsPath}");
+}
 
 // Ladda data från JSON-filerna innan programmet startar.
 transactionStore.LoadFromJson();
@@ -23,5 +39,13 @@ MainMenu mainMenu = new MainMenu(budgetService);
 mainMenu.Show();
 
 // Spara data till JSON-filerna innan programmet avslutas.
+if (!transactionStore.SaveToJson())
+{
+    logger.Error(LogEvent.SaveFailed, $"Kunde inte spara {transactionsPath}");
+}
+if (!budgetStore.SaveToJson())
+{
+    logger.Error(LogEvent.SaveFailed, $"Kunde inte spara {budgetsPath}");
+}
 transactionStore.SaveToJson();
 budgetStore.SaveToJson();
