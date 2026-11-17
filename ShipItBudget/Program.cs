@@ -33,6 +33,8 @@ if (!budgetStore.LoadFromJson())
 transactionStore.LoadFromJson();
 budgetStore.LoadFromJson();
 
+WelcomeScreen.Show();
+
 MainMenu mainMenu = new MainMenu(budgetService);
 mainMenu.Show();
 
@@ -45,3 +47,5 @@ if (!budgetStore.SaveToJson())
 {
     logger.Error(LogEvent.SaveFailed, $"Kunde inte spara {budgetsPath}");
 }
+transactionStore.SaveToJson();
+budgetStore.SaveToJson();

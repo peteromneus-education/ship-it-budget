@@ -23,12 +23,13 @@ public class DayMenu
 
             List<Transaction> transactionsForSelectedDate = budgetService.GetTransactionbyDate(selectedDate);
 
-            Table transactionsTable = new();
-            transactionsTable.Title($"Transaktioner för {selectedDate:yyyy-MM-dd}");
-            transactionsTable.ShowRowSeparators();
-            transactionsTable.AddColumn("Typ");
-            transactionsTable.AddColumn("Kategori");
-            transactionsTable.AddColumn("Belopp");
+            Table transactionsTable = new Table()
+            .Title($"Transaktioner för {selectedDate:yyyy-MM-dd}")
+            .ShowRowSeparators()
+            .DoubleEdgeBorder()
+            .AddColumn("Typ")
+            .AddColumn("Kategori")
+            .AddColumn("Belopp");
 
             if (transactionsForSelectedDate.Count == 0)
             {
@@ -52,7 +53,7 @@ public class DayMenu
     new SelectionPrompt<string>()
         .Title("Välj ett alternativ:")
         .WrapAround()
-        .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+        .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
         .AddChoices("Ny transaktion")
         .AddChoices("Redigera transaktion")
         .AddChoices("Radera transaktion")
@@ -119,7 +120,7 @@ public class DayMenu
             new SelectionPrompt<Transaction>()
                 .Title(title)
                 .WrapAround()
-                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
+                .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
                 .UseConverter(DescribeTransaction)
                 .AddChoices(transactions));
     }

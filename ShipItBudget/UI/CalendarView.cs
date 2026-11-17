@@ -173,7 +173,7 @@ public class CalendarView
                 if (dayOfMonth == selectedDate.Day)
                 {
                     weekCells[weekdayColumnIndex] =
-                        $"[black on violet]{dayOfMonth}[/] ◀\n" +
+                        $"[black on yellow]{dayOfMonth}[/] [rapidblink]◀[/]\n" +
                         $"{incomeSummaryText}\n" +
                         $"{expenseSummaryText}";
                 }
