@@ -1,6 +1,7 @@
 // Kopplar ihop lagring, logik och UI.
 using ShipItBudget;
 using ShipItBudget.UI;
+using Spectre.Console;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -19,33 +20,65 @@ Logger logger = new Logger(logStore);
 
 BudgetService budgetService = new BudgetService(transactionStore, budgetStore, logger);
 
-// Ladda data från JSON-filerna innan programmet startar.
-if (!transactionStore.LoadFromJson())
-{
-    logger.Error(LogEvent.LoadFailed, $"Kunde inte läsa {transactionsPath}");
-}
-if (!budgetStore.LoadFromJson())
-{
-    logger.Error(LogEvent.LoadFailed, $"Kunde inte läsa {budgetsPath}");
-}
-
-// Ladda data från JSON-filerna innan programmet startar.
-transactionStore.LoadFromJson();
-budgetStore.LoadFromJson();
-
 WelcomeScreen.Show();
 
-MainMenu mainMenu = new MainMenu(budgetService);
-mainMenu.Show();
+if (!TryLoad(transactionStore, logger, transactionsPath))
+{
+    return;
+}
 
-// Spara data till JSON-filerna innan programmet avslutas.
-if (!transactionStore.SaveToJson())
+if (!TryLoad(budgetStore, logger, budgetsPath))
 {
-    logger.Error(LogEvent.SaveFailed, $"Kunde inte spara {transactionsPath}");
+    return;
 }
-if (!budgetStore.SaveToJson())
+
+MainMenu mainMenu = new MainMenu(budgetService);
+
+bool keepRunning = true;
+while (keepRunning)
 {
-    logger.Error(LogEvent.SaveFailed, $"Kunde inte spara {budgetsPath}");
+    mainMenu.Show();
+
+    // Försök spara båda filerna, även om den första misslyckas.
+    bool transactionsSaved = TrySave(transactionStore, logger, transactionsPath);
+    bool budgetsSaved = TrySave(budgetStore, logger, budgetsPath);
+
+    if (transactionsSaved && budgetsSaved)
+    {
+        keepRunning = false;
+    }
+    else
+    {
+        // Användaren väljer antingen att avsluta och förlora ändringarna, eller gå tillbaka till menyn.
+        bool quitAnyway = AnsiConsole.Confirm("\nVill du avsluta ändå? Osparade ändringar förloras.", defaultValue: false);
+        keepRunning = !quitAnyway;
+    }
 }
-transactionStore.SaveToJson();
-budgetStore.SaveToJson();
+
+// Försöker ladda en DataStore och visar ett felmeddelande om det misslyckas. Avslutar programmet om det inte går att läsa filen.
+static bool TryLoad<T>(DataStore<T> store, Logger logger, string path)
+{
+    if (!store.LoadFromJson())
+    {
+        logger.Error(LogEvent.LoadFailed, $"{path} kunde inte läsas.");
+        AnsiConsole.MarkupLine($"\n[red]{Markup.Escape(path)} kunde inte läsas och programmet kommer därför att avslutas.[/] \n\n" +
+            $"Dina data finns kvar. Kontakta support för hjälp.");
+        AnsiConsole.MarkupLine($"\n[grey]Tryck valfri tangent för att avsluta programmet.[/]");
+        Console.ReadKey(true);
+        return false;
+    }
+    return true;
+}
+
+// Sparar en DataStore och visar ett felmeddelande om det misslyckas.
+static bool TrySave<T>(DataStore<T> store, Logger logger, string path)
+{
+    if (!store.SaveToJson())
+    {
+        logger.Error(LogEvent.SaveFailed, $"{path} kunde inte sparas.");
+        AnsiConsole.MarkupLine($"\n[red]Programmet har stött på ett problem. {Markup.Escape(path)} kunde inte sparas.[/]\n" +
+            "Notera dina ändringar och kontakta support.");
+        return false;
+    }
+    return true;
+}
