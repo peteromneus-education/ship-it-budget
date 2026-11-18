@@ -15,66 +15,34 @@ namespace ShipItBudget.UI
         public void ShowAdd(DateTime formDate)
         {
             Console.Clear();
-            AnsiConsole.MarkupLine("[bold]LÄGG TILL NY TRANSAKTION[/]\n");
-
-            TransactionType? type = AskType(null, true);
+            AnsiConsole.MarkupLine("[bold yellow]LÄGG TILL NY TRANSAKTION[/]\n");
+            
+            TransactionType? type = AskType(null);
             if (type == null) return;
 
             decimal amount = AskAmount(null);
-            string category = AskCategory(type.Value, null);
+            string category = AskCategory(null, type);
             DateTime date = AskDate(formDate);
 
-
-
-             // fråga ja elr nej innan man spara
-            bool confirm = AnsiConsole.Prompt(
-            new SelectionPrompt<bool>()
-            .Title("\nVill du spara transaktionen?")
-            .AddChoices(true, false)
-            .UseConverter(choice => choice ? "Ja" : "Nej"));
-
-            if (!confirm)
-            {
-            AnsiConsole.MarkupLine("[yellow]Åtgärden avbröts. Inget sparades.[/]");
-            Thread.Sleep(1000);
-            return; // Hoppar ur metoden utan att uppdatera
-            }
-
             bool success = budgetService.AddTransaction(amount, type.Value, category, date) == ServiceResult.Success;
-
             ShowResult(success, "Transaktion tillagd!", "Fel vid tillägg av transaktion!");
         }
 
         public void ShowEdit(Transaction transaction)
         {
             Console.Clear();
-            AnsiConsole.MarkupLine("[bold]REDIGERA TRANSAKTION[/]\n");
+            AnsiConsole.MarkupLine("[bold yellow]REDIGERA TRANSAKTION[/]\n");
             AnsiConsole.MarkupLine("[grey]Tryck Enter för att behålla nuvarande värde.[/]\n");
 
-            TransactionType? type = AskType(transaction.Type, true);
+            TransactionType? type = AskType(transaction.Type);
             if (type == null) return;
 
             decimal amount = AskAmount(transaction.Amount);
-            string category = AskCategory(type.Value, transaction.Category);
+            string category = AskCategory(transaction.Category, type);
             DateTime date = AskDate(transaction.Date);
 
-
-
-            // fråga ja elr nej innan man spara
-            bool confirm = AnsiConsole.Prompt(
-            new SelectionPrompt<bool>()
-            .Title("\nVill du spara transaktionen?")
-            .AddChoices(true, false)
-            .UseConverter(choice => choice ? "Ja" : "Nej"));
-
-            if (!confirm)
-            {
-            AnsiConsole.MarkupLine("[yellow]Åtgärden avbröts. Inget sparades.[/]");
-            Thread.Sleep(1000);
-            return; // Hoppar ur metoden utan att uppdatera
-            }
-
             bool success = budgetService.UpdateTransaction(transaction.Id, amount, type.Value, date, category) == ServiceResult.Success;
+
             ShowResult(success, "Transaktion uppdaterad!", "Fel vid uppdatering av transaktion!"); //Ge olika text beroende om de e true elr false på Success
         }
 
@@ -96,116 +64,69 @@ namespace ShipItBudget.UI
             return AnsiConsole.Prompt(prompt);
         }
 
-       /*  private TransactionType? AskType(TransactionType? currentType, bool allowCancel = false)
+        private TransactionType? AskType(TransactionType? currentType)
         {
-            const string backLabel = "[red]Gå tillbaka[/]";
-            string incomeLabel = TransactionTypeText.DisplayText(TransactionType.Income);
-            string expenseLabel = TransactionTypeText.DisplayText(TransactionType.Expense);
+            bool cancelled = false;
 
-            var prompt = new SelectionPrompt<string>()
-                .Title("Välj typ:")
+            SelectionPrompt<TransactionType> prompt = new SelectionPrompt<TransactionType>()
+                .Title("Välj typ [grey](Esc för att avbryta)[/]:")
                 .WrapAround()
-                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink));
-
-            if (allowCancel)
-            {
-                prompt.AddChoice(backLabel);
-            }
-
-            prompt.AddChoices(incomeLabel, expenseLabel);
+                .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
+                .UseConverter(TransactionTypeText.DisplayText)
+                .AddChoices(TransactionType.Income, TransactionType.Expense)
+                .AddCancelResult(() =>
+                {
+                    cancelled = true; // Körs när användaren trycker Esc
+                    return TransactionType.Income; // Måste returnera något, men TransactionType.Income används inte!
+                });
 
             if (currentType != null)
             {
-                prompt.DefaultValue(TransactionTypeText.DisplayText(currentType.Value));
+                prompt.DefaultValue(currentType.Value);
             }
 
-            string result = AnsiConsole.Prompt(prompt);
+            TransactionType chosenType = AnsiConsole.Prompt(prompt);
 
-            if (result == backLabel) return null;
-            if (result == incomeLabel) return TransactionType.Income;
-            return TransactionType.Expense;
-        } */
-
-        private TransactionType? AskType(TransactionType? currentType, bool allowCancel = false)
-        {
-            TransactionType[] types = { TransactionType.Income, TransactionType.Expense };
-            string[] labels = { "Inkomst", "Utgift" };
-
-            int selectedIndex = currentType == TransactionType.Expense ? 1 : 0;
-            TransactionType? result = null;
-
-            AnsiConsole.Live(RenderMenu(selectedIndex))
-                .Start(ctx =>
-                {
-                    ctx.Refresh(); // rita menyn första gången
-
-                    while (true)
-                    {
-                        var key = Console.ReadKey(true);
-
-                        if (key.Key == ConsoleKey.UpArrow)
-                        {
-                            selectedIndex = (selectedIndex - 1 + types.Length) % types.Length;
-                            ctx.UpdateTarget(RenderMenu(selectedIndex));
-                            ctx.Refresh();
-                        }
-                        else if (key.Key == ConsoleKey.DownArrow)
-                        {
-                            selectedIndex = (selectedIndex + 1) % types.Length;
-                            ctx.UpdateTarget(RenderMenu(selectedIndex));
-                            ctx.Refresh();
-                        }
-                        else if (key.Key == ConsoleKey.Enter)
-                        {
-                            result = types[selectedIndex];
-                            break;
-                        }
-                        else if (key.Key == ConsoleKey.Escape && allowCancel)
-                        {
-                            result = null;
-                            break;
-                        }
-                    }
-                });
-
-            return result;
-
-            Panel RenderMenu(int index)
+            if (cancelled)
             {
-                var lines = labels.Select((label, i) =>
-                    i == index ? $"[violet]> {label}[/]" : $"  {label}");
-
-                string cancelText = allowCancel ? " [grey](Tryck ESC för att backa)[/]" : "";
-
-                return new Panel(new Markup(string.Join("\n", lines)))
-                    .Header($"Välj typ{cancelText}")
-                    .BorderColor(Color.Violet);
+                return null;
             }
+
+            AnsiConsole.MarkupLine($"Typ: {TransactionTypeText.DisplayText(chosenType)}");
+            return chosenType;
         }
 
-
-
-
-        private string AskCategory(TransactionType type, string? currentCategory)
+        private string AskCategory(string? currentCategory, TransactionType? type)
         {
-            string[] availableCategories = type == TransactionType.Income
-                ? Categories.Income
-                : Categories.Expense;
+            bool cancelled = false;
 
             SelectionPrompt<string> prompt = new SelectionPrompt<string>()
                 .Title("Välj kategori:")
                 .WrapAround()
-                .HighlightStyle(new Style(Color.Violet, Color.Black, Decoration.RapidBlink))
-                .AddChoices(availableCategories);
+                .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
+                .UseConverter(Markup.Escape)
+                .AddChoices(type == TransactionType.Income ? Categories.Income : Categories.Expense)
+                .AddCancelResult(() =>
+                {
+                    cancelled = true; // Körs bara när användaren trycker Esc
+                    return ""; // Måste returnera något, men värdet används inte
+                });
 
-            if (currentCategory != null && availableCategories.Contains(currentCategory))
+            if (currentCategory != null)
             {
                 prompt.DefaultValue(currentCategory);
             }
 
-            return AnsiConsole.Prompt(prompt);
-        }
+            string chosenCategory = AnsiConsole.Prompt(prompt);
+            
+            if (cancelled)
+            {
+                return null!;
+            }
 
+            AnsiConsole.MarkupLine($"Kategori: {Markup.Escape(chosenCategory)}");
+            return chosenCategory;
+        }
 
         private DateTime AskDate(DateTime defaultDate)
         {
