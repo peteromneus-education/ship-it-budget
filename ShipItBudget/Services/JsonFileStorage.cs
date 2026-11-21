@@ -1,4 +1,4 @@
-// Läser och skriver JSON med generiska metoder. Rapportera filfel och trasig JSON så att befintliga data inte skrivs över av misstag.
+// Läser och skriver JSON med generiska metoder. Fel kastas vidare till DataStore, som hanterar dem.
 
 using System.Text.Json;
 

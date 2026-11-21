@@ -1,4 +1,4 @@
-// Visar kalendern och hanterar datumval med piltangenter. Avsluta Live Display innan DayMenu öppnas.
+// Visar kalendern och hanterar datumval med piltangenter. Live Display avslutas innan DayMenu öppnas.
 
 using Spectre.Console;
 
@@ -24,7 +24,7 @@ public class CalendarView
             bool keepRunning = true;
             bool shouldOpenDayMenu = false;
 
-            AnsiConsole.Live(BuildCalendarTable()) // BuildCalendarTable() bygger kalandervyn och AnsiConsole omsluter den i en Live Display
+            AnsiConsole.Live(BuildCalendarTable()) // BuildCalendarTable() bygger kalendervyn och AnsiConsole omsluter den i en Live Display
             .AutoClear(true) // Rensar Live Display när den avslutas
                 .Start(liveDisplayContext =>
             {
@@ -79,7 +79,7 @@ public class CalendarView
             }
         }
 
-        Table BuildCalendarTable() // Bygger kalendervyn med hjälp av Spectre.Console.Table och returnerar den som en Table-objekt.
+        Table BuildCalendarTable() // Bygger kalendervyn med hjälp av Spectre.Console.Table och returnerar den som ett Table-objekt.
         {
             string[] weekCells = new string[7]; // Skapar en array med 7 celler för att representera en vecka i kalendern.
 
@@ -103,29 +103,29 @@ public class CalendarView
             foreach (TableColumn weekdayColumn in calendarTable.Columns)
             {
                 weekdayColumn.Width = 12;
-                weekdayColumn.Padding = new Padding(0, 0); // Sätter padding för kolumnerna i kalendern till 0 för att undvika extra utrymme mellan cellerna.
+                weekdayColumn.Padding = new Padding(0, 0); // Ingen padding, så att cellerna inte får extra utrymme.
             }
 
             Array.Fill(weekCells, ""); // Fyller arrayen med tomma strängar för att representera tomma celler i kalendern.
 
-            DateTime firstDayOfMonth = new(selectedDate.Year, selectedDate.Month, 1); // Skapar ett DateTime-objekt för den första dagen i den valda månaden som behövs för att beräkna vilken veckodag den första dagen i månaden infaller på.
+            DateTime firstDayOfMonth = new(selectedDate.Year, selectedDate.Month, 1); // Första dagen i månaden; behövs för att räkna ut vilken veckodag månaden börjar på.
 
             int daysInMonth = DateTime.DaysInMonth(selectedDate.Year, selectedDate.Month);
 
-            int emptyCells = (int)firstDayOfMonth.DayOfWeek - 1; // Beräknar antalet tomma celler som behövs för att fylla ut kalendern innan den första dagen i månaden. Eftersom DayOfWeek enum börjar på söndag (0) och vi vill att måndag ska vara den första kolumnen, drar vi ifrån 1. Om första dagen är en söndag, sätts emptyCells till 6 för att fylla ut hela veckan.
+            int emptyCells = (int)firstDayOfMonth.DayOfWeek - 1; // Tomma celler före månadens första dag. DayOfWeek börjar på söndag (0) men kalendern på måndag, därför -1.
 
-            if (emptyCells == -1) // Om första dagen i månaden är en söndag, sätts emptyCells till 6 för att fylla ut hela veckan.
+            if (emptyCells == -1) // Söndag ger -1, så då blir hela första veckan tom (6 celler).
             {
                 emptyCells = 6;
             }
 
-            int weekdayColumnIndex = emptyCells; // Sätter indexet för den första cellen i kalendern som ska fyllas med en dag i månaden. Om första dagen i månaden är en måndag, sätts weekdayColumnIndex till 0. Om första dagen är en söndag, sätts weekdayColumnIndex till 6.
+            int weekdayColumnIndex = emptyCells; // Kolumnen där månadens första dag hamnar (0 = måndag, 6 = söndag).
 
-            for (int dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++) // Loopar igenom alla dagar i den valda månaden och fyller kalendern med dagnummer, inkomster och utgifter för varje dag. Om dagen är vald, markeras den med en grön bakgrund. Om dagen är en söndag, markeras den med röd text.
+            for (int dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++) // Fyller kalendern dag för dag med dagnummer, inkomster och utgifter. Vald dag markeras med gul bakgrund, söndagar med röd text.
             {
                 DateTime cellDate = new(selectedDate.Year, selectedDate.Month, dayOfMonth);
 
-                List<Transaction> transactionsForCellDate = budgetService.GetTransactionbyDate(cellDate);
+                List<Transaction> transactionsForCellDate = budgetService.GetTransactionsByDate(cellDate);
 
                 List<Transaction> incomeForCellDate = transactionsForCellDate
                     .Where(transaction => transaction.Type == TransactionType.Income)

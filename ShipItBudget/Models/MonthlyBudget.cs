@@ -1,5 +1,3 @@
-using System;
-
 // Beskriver månadens utgiftsgräns. Year och Month identifierar budgeten; utfallet beräknas från transaktionerna.
 
 public class MonthlyBudget
@@ -8,20 +6,20 @@ public class MonthlyBudget
     public int Year {get; private set;}
     public decimal Limit {get; private set;}
 
-    //Följer samma princip som Transactionklassen med konstruktör och valederings metod. Olika felmeddelande beroende på fel
+    // Följer samma princip som Transaction-klassen med konstruktor och valideringsmetod. Olika felmeddelanden beroende på fel
     public MonthlyBudget(int month, int year, decimal limit)
     {
-        string? FelMeddelande = IsValid(month, year, limit);
-        if(FelMeddelande != null)
+        string? errorMessage = IsValid(month, year, limit);
+        if(errorMessage != null)
         {
-            throw new(FelMeddelande);
+            throw new(errorMessage);
         }
         Month = month;
         Year = year;
         Limit = limit;
-
     }
-    public static string? IsValid(int month, int year, decimal limit) //Samma som Transaction klassen kolla så en budget uppfyller kraven
+
+    public static string? IsValid(int month, int year, decimal limit) // Samma som i Transaction-klassen: kontrollerar att en budget uppfyller kraven
     {
         if(month < 1 || month > 12)
         return "Ange en giltig månad 1-12";
@@ -35,14 +33,13 @@ public class MonthlyBudget
         return null;
     }
 
-    public string? Update(decimal newlimit) // Metod för att kunna nå Limiten, månad och år e låst 
+    public string? Update(decimal newLimit) // Ändrar gränsen; månad och år går inte att ändra
     {
-        if(newlimit < 0)
+        if(newLimit < 0)
         {
             return "Budget gränsen kan inte va negativ";
         }
-        Limit = newlimit;
+        Limit = newLimit;
         return null;
     }
 }
-

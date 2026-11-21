@@ -13,7 +13,7 @@ namespace ShipItBudget.UI
                 Color = Color.Gold1,
                 Justification = Justify.Center
             };
-            var version = new Text("Version 0.1.0", new Style(Color.Grey))
+            var version = new Text("Version 1.0.0", new Style(Color.Grey))
             {
                 Justification = Justify.Center
             };

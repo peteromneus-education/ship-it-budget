@@ -1,4 +1,4 @@
-// Håller objekt av typen T i minnet. Implementera samlingshanteringen här och låt JsonFileStorage sköta filformatet.
+// Håller objekt av typen T i minnet. JsonFileStorage sköter filformatet.
 
 using System.Text.Json;
 
@@ -45,7 +45,7 @@ namespace ShipItBudget
             return items;
         }
 
-        // Ladda och spara data till JSON med hjälp av JsonFileStorage. Rapportera filfel och trasig JSON så att befintliga data inte skrivs över av misstag.
+        // Läser in data från JSON via JsonFileStorage. Vid filfel eller trasig JSON sätts loadFailed, så att befintliga data inte skrivs över.
         public bool LoadFromJson()
         {
             try
@@ -63,7 +63,7 @@ namespace ShipItBudget
             { loadFailed = true; return false; }
         }
 
-        // Spara data till JSON med hjälp av JsonFileStorage. Rapportera filfel så att befintliga data inte skrivs över av misstag.
+        // Sparar data till JSON via JsonFileStorage. Returnerar false vid filfel eller om inläsningen misslyckades.
         public bool SaveToJson()
         {
             if (loadFailed)
