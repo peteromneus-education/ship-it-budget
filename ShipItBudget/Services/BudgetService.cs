@@ -22,9 +22,13 @@ public class BudgetService
         _logger = logger;
     }
 
-    public List<Transaction> GetTransactionsByDate(DateTime chosenDate) // Hittar transaktionerna för ett visst datum
+    public List<Transaction> GetTransactionsByDate(DateTime chosenDate) // Hittar transaktionerna för ett visst datum, sorterade
     {
-        return _transactionStore.GetAll().Where(transaction => transaction.Date.Date == chosenDate.Date).ToList(); // .Date jämför bara datumet, inte klockslaget
+        return _transactionStore.GetAll()
+            .Where(transaction => transaction.Date.Date == chosenDate.Date) // .Date jämför bara datumet, inte klockslaget
+            .OrderBy(transaction => transaction.Type) // Inkomster före utgifter
+            .ThenByDescending(transaction => transaction.Amount) // Inom varje typ: störst belopp först
+            .ToList();
     }
 
     public ServiceResult DeleteTransaction(Guid id) // Tar bort en transaktion
