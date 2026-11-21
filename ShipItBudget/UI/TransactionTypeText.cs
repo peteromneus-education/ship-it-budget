@@ -4,6 +4,7 @@
     {
         public static string DisplayText(TransactionType type)
         {
+            // Switch-uttryck: varje enumvärde översätts till svensk text. _ fångar alla andra värden.
             return type switch
             {
                 TransactionType.Income => "Inkomst",

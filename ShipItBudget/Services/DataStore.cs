@@ -8,11 +8,11 @@ namespace ShipItBudget
     {
         private List<T> items = new List<T>();
 
-        // Fields
         private string filePath;
+        // Sätts om inläsningen misslyckas. Då vägrar SaveToJson att spara, så att en trasig fil inte skrivs över med en tom lista.
         private bool loadFailed = false;
 
-        // Constructor
+        // => är en kortform för en metod med en enda rad. this.filePath är fältet, filePath är parametern.
         public DataStore(string filePath) => this.filePath = filePath;
 
         public void AddItem(T item)
@@ -25,6 +25,7 @@ namespace ShipItBudget
             return items.Remove(item);
         }
 
+        // Func<T, bool> är ett villkor som skickas in som parameter, t.ex. t => t.Id == id.
         public T? FindItem(Func<T, bool> condition)
         {
             foreach (T item in items)
@@ -35,6 +36,7 @@ namespace ShipItBudget
                 }
             }
 
+            // default är null för klasser, alltså "hittades inte".
             return default;
         }
 
@@ -51,6 +53,7 @@ namespace ShipItBudget
                 items = JsonFileStorage.Load<T>(filePath);
                 return true;
             }
+            // when fångar bara de listade undantagstyperna. Oväntade fel får krascha programmet, så att de syns och kan rättas.
             catch (Exception ex) when (ex is
                 JsonException or
                 IOException or

@@ -41,6 +41,7 @@ public class DayMenu
                 {
                     string transactionTypeText = TransactionTypeText.DisplayText(transaction.Type);
 
+                    // Markup.Escape skyddar mot att [ eller ] i en kategori tolkas som Spectre-markup.
                     transactionsTable.AddRow(transactionTypeText, Markup.Escape(transaction.Category),
                         $"{transaction.Amount} kr");
                 }
@@ -121,6 +122,7 @@ public class DayMenu
                 .Title(title)
                 .WrapAround()
                 .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
+                // UseConverter bestämmer hur varje Transaction visas som text i listan. Själva valet returneras som Transaction-objekt.
                 .UseConverter(DescribeTransaction)
                 .AddChoices(transactions));
     }

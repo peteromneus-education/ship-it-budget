@@ -10,6 +10,7 @@ public class Logger
         _logStore = logStore;
     }
 
+    // Info och Error är genvägar till Write med rätt LogLevel, så att anroparen inte behöver ange nivån själv.
     public void Info(LogEvent logEvent, string message)
     {
         Write(LogLevel.Info, logEvent, message);
