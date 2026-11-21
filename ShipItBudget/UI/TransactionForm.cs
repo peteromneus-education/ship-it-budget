@@ -17,6 +17,7 @@ namespace ShipItBudget.UI
             Console.Clear();
             AnsiConsole.MarkupLine("[bold yellow]LÄGG TILL NY TRANSAKTION[/]\n");
             
+            // null betyder att användaren tryckte Esc. Då avbryts formuläret utan att något sparas.
             TransactionType? type = AskType(null);
             if (type == null) return;
 
@@ -24,6 +25,7 @@ namespace ShipItBudget.UI
             string category = AskCategory(null, type);
             DateTime date = AskDate(formDate);
 
+            // ServiceResult jämförs med Success och blir en bool, så alla fel ger samma meddelande. type.Value hämtar värdet ur TransactionType?.
             bool success = budgetService.AddTransaction(amount, type.Value, category, date) == ServiceResult.Success;
             ShowResult(success, "Transaktion tillagd!", "Fel vid tillägg av transaktion!");
         }
@@ -50,7 +52,7 @@ namespace ShipItBudget.UI
         {
             TextPrompt<decimal> prompt = new TextPrompt<decimal>("Ange belopp:")
             {
-                Culture = new CultureInfo("sv-SE") // Decimalkomma, t.ex. 12,50
+                Culture = new CultureInfo("sv-SE") // Tillåter svenskt decimalkomma, t.ex. 12,50
             }
                 .Validate(amount => amount > 0
                     ? ValidationResult.Success()
@@ -58,6 +60,7 @@ namespace ShipItBudget.UI
 
             if (currentAmount != null)
             {
+                // Vid redigering visas nuvarande värde som förval. Enter behåller det.
                 prompt.DefaultValue(currentAmount.Value);
             }
 
@@ -74,6 +77,7 @@ namespace ShipItBudget.UI
                 .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
                 .UseConverter(TransactionTypeText.DisplayText)
                 .AddChoices(TransactionType.Income, TransactionType.Expense)
+                // AddCancelResult gör att Esc avslutar prompten. Den måste returnera ett värde av rätt typ, så flaggan cancelled visar att det var Esc.
                 .AddCancelResult(() =>
                 {
                     cancelled = true; // Körs när användaren trycker Esc
@@ -105,6 +109,7 @@ namespace ShipItBudget.UI
                 .WrapAround()
                 .HighlightStyle(new Style(Color.Yellow, Color.Black, Decoration.Bold | Decoration.RapidBlink))
                 .UseConverter(Markup.Escape)
+                // Villkorsoperatorn ? : väljer kategorilista beroende på om det är en inkomst eller en utgift.
                 .AddChoices(type == TransactionType.Income ? Categories.Income : Categories.Expense)
                 .AddCancelResult(() =>
                 {
@@ -121,6 +126,7 @@ namespace ShipItBudget.UI
             
             if (cancelled)
             {
+                // null! tystar kompilatorns varning, eftersom metoden lovar att returnera en string. Anroparen kontrollerar inte null i dag.
                 return null!;
             }
 
@@ -136,6 +142,7 @@ namespace ShipItBudget.UI
                     .ShowDefaultValue());
         }
 
+        // static eftersom metoden inte använder några fält i objektet.
         private static void ShowResult(bool success, string successMessage, string errorMessage)
         {
             if (success)

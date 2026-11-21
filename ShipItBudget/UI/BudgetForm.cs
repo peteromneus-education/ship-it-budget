@@ -23,6 +23,7 @@ namespace ShipItBudget.UI
             }
             AnsiConsole.MarkupLine($"Budget för {month:Y}: [yellow]{currentText}[/]\n");
 
+            // ?. ger null om budget är null, annars Limit. Utan budget visas alltså inget förval.
             decimal newLimit = AskLimit(budget?.Limit);
 
             ServiceResult serviceResult;
@@ -63,8 +64,10 @@ namespace ShipItBudget.UI
         {
             TextPrompt<decimal> prompt = new TextPrompt<decimal>("Ange budgetgräns:")
             {
+                // sv-SE gör att decimalkomma, t.ex. 12,50, tolkas rätt.
                 Culture = new CultureInfo("sv-SE")
             }
+                // Validate kontrollerar svaret direkt i prompten och frågar igen vid fel.
                 .Validate(limit => limit >= 0
                     ? ValidationResult.Success()
                     : ValidationResult.Error("[red]Budgetgränsen kan inte vara negativ[/]"));

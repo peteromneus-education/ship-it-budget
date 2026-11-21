@@ -11,6 +11,7 @@ namespace ShipItBudget.UI
             this.budgetService = budgetService;
         }
 
+        // today skickas in som parameter, så att rubrik och statistik garanterat gäller samma månad.
         private Columns BuildDashboard(DateTime today)
         {
             Dictionary<string, decimal> expensesByCategory = budgetService.GetExpenseTotalsByCategory(today.Month, today.Year);
@@ -52,6 +53,7 @@ namespace ShipItBudget.UI
             foreach (KeyValuePair<string, decimal> expensePair in expensesByCategory)
             {
                 chartExpensesPerCategory
+                    // BreakdownChart kräver double. % (modulo) börjar om på första färgen när färgerna tar slut.
                     .AddItem(expensePair.Key, (double)expensePair.Value, chartColors[colorIndex % chartColors.Length]);
 
                 colorIndex++;
@@ -74,6 +76,7 @@ namespace ShipItBudget.UI
                 .BorderColor(Color.Gold1)
                 .Padding(2, 1);
 
+            // Columns lägger panelerna bredvid varandra. Collapse gör dem inte bredare än innehållet.
             return new Columns(panelStats, panelChart)
                 .Padding(2, 0)
                 .Collapse();
@@ -81,6 +84,7 @@ namespace ShipItBudget.UI
 
         public void Show()
         {
+            // Lokal variabel som återställs vid varje anrop, så att Program.cs kan visa menyn igen om sparandet misslyckas.
             bool keepMainMenuOpen = true;
 
             Rule separatorRule = new Rule()
@@ -102,6 +106,7 @@ namespace ShipItBudget.UI
                 AnsiConsole.WriteLine();
                 AnsiConsole.Write(separatorRule);
 
+                // SelectionPrompt returnerar den valda texten, som jämförs i switch nedan. Texterna måste vara exakt lika på båda ställena.
                 string choice = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("")
