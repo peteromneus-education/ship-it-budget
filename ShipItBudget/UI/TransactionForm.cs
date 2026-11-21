@@ -45,7 +45,7 @@ namespace ShipItBudget.UI
 
             bool success = budgetService.UpdateTransaction(transaction.Id, amount, type.Value, date, category) == ServiceResult.Success;
 
-            ShowResult(success, "Transaktion uppdaterad!", "Fel vid uppdatering av transaktion!"); //Ge olika text beroende om de e true elr false på Success
+            ShowResult(success, "Transaktion uppdaterad!", "Fel vid uppdatering av transaktion!"); // Visar olika text beroende på om uppdateringen lyckades
         }
 
         private decimal AskAmount(decimal? currentAmount)

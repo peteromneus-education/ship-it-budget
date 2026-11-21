@@ -47,11 +47,11 @@ namespace ShipItBudget.UI
                     AnsiConsole.MarkupLine("[red]Ingen budget hittades[/]");
                     break;
 
-                case ServiceResult.InValidInput:
+                case ServiceResult.InvalidInput:
                     AnsiConsole.MarkupLine("[red]Ogiltig budgetgräns[/]");
                     break;
 
-                case ServiceResult.AlreadyExist:
+                case ServiceResult.AlreadyExists:
                     AnsiConsole.MarkupLine("[red]Det finns redan en budget för månaden[/]");
                     break;
             }

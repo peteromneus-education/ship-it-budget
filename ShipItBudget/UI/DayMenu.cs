@@ -21,7 +21,7 @@ public class DayMenu
         {
             Console.Clear();
 
-            List<Transaction> transactionsForSelectedDate = budgetService.GetTransactionbyDate(selectedDate);
+            List<Transaction> transactionsForSelectedDate = budgetService.GetTransactionsByDate(selectedDate);
 
             Table transactionsTable = new Table()
             .Title($"Transaktioner för {selectedDate:yyyy-MM-dd}")

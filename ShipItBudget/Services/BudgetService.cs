@@ -1,19 +1,20 @@
-using System;
 using ShipItBudget;
+
 public enum ServiceResult //Fasta val för resultat
 {
     Success,
     NotFound,
-    InValidInput,
-    AlreadyExist
+    InvalidInput,
+    AlreadyExists
 }
+
 public class BudgetService
 {
     private readonly DataStore<Transaction> _transactionStore; //Kopplingar till datalagringen 
     private readonly DataStore<MonthlyBudget> _budgetStore;
     private readonly Logger _logger; //Loggar händelser
 
-    //Konstruktor som koppla in lagring och logger
+    //Konstruktor som kopplar in lagring och logger
     public BudgetService(DataStore<Transaction> transactionStore, DataStore<MonthlyBudget> budgetStore, Logger logger)
     {
         _transactionStore = transactionStore;
@@ -21,44 +22,38 @@ public class BudgetService
         _logger = logger;
     }
 
-
-    public List<Transaction> GetSortedbyDate() //metod som sotera efter datumet
+    public List<Transaction> GetTransactionsByDate(DateTime chosenDate) // Hittar transaktionerna för ett visst datum
     {
-        return _transactionStore.GetAll().OrderByDescending(transaction => transaction.Date).ToList();
+        return _transactionStore.GetAll().Where(transaction => transaction.Date.Date == chosenDate.Date).ToList(); // .Date jämför bara datumet, inte klockslaget
     }
 
-    public List<Transaction> GetTransactionbyDate(DateTime ChoosenDate) // metod som hittar transaktioner efter ett visst datum
+    public ServiceResult DeleteTransaction(Guid id) // Tar bort en transaktion
     {
-        return _transactionStore.GetAll().Where(transaction => transaction.Date.Date == ChoosenDate.Date).ToList(); //Date.Date så man bar få datum
-    }
-
-    public ServiceResult DeleteTransaction(Guid Id) //metod för att ta bort transaction
-    {
-        var transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == Id); //letar upp rätt Id 
+        Transaction? transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == id); // Letar upp rätt id
         if (transaction == null)
         {
             return ServiceResult.NotFound;
         }
         _transactionStore.RemoveItem(transaction);
-        _logger.Info(LogEvent.TransactionDeleted, $"Transaktion {Id} borttagen: {transaction.Type}, {transaction.Amount} kr, {transaction.Category}, {transaction.Date:yyyy-MM-dd}");
+        _logger.Info(LogEvent.TransactionDeleted, $"Transaktion {id} borttagen: {transaction.Type}, {transaction.Amount} kr, {transaction.Category}, {transaction.Date:yyyy-MM-dd}");
         return ServiceResult.Success;
     }
 
-    public ServiceResult UpdateTransaction(Guid Id, decimal newamount, TransactionType newType, DateTime newDate, string newcategory) //string? så man kan sriva i retrun
+    public ServiceResult UpdateTransaction(Guid id, decimal newAmount, TransactionType newType, DateTime newDate, string newCategory) // Uppdaterar en befintlig transaktion
     {
-        var transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == Id); //samma princip som Deleate metoden
+        Transaction? transaction = _transactionStore.GetAll().FirstOrDefault(transaction => transaction.Id == id); // Samma princip som DeleteTransaction
         if (transaction == null)
         {
             return ServiceResult.NotFound;
         }
-        if (Transaction.IsValid(newamount, newcategory) == false)//använder valedringsmetoden på dem nya värderna
+        if (Transaction.IsValid(newAmount, newCategory) == false) // Validerar de nya värdena
         {
-            return ServiceResult.InValidInput;
+            return ServiceResult.InvalidInput;
         }
 
         string before = $"{transaction.Type}, {transaction.Amount} kr, {transaction.Category}, {transaction.Date:yyyy-MM-dd}";
-        transaction.Update(newamount, newType, newDate, newcategory);
-        _logger.Info(LogEvent.TransactionUpdated, $"Transaktion {Id} ändrad: {before} → {newType}, {newamount} kr, {newcategory}, {newDate:yyyy-MM-dd}");
+        transaction.Update(newAmount, newType, newDate, newCategory);
+        _logger.Info(LogEvent.TransactionUpdated, $"Transaktion {id} ändrad: {before} → {newType}, {newAmount} kr, {newCategory}, {newDate:yyyy-MM-dd}");
 
         return ServiceResult.Success;
     }
@@ -67,54 +62,57 @@ public class BudgetService
     {
         if (Transaction.IsValid(amount, category) == false)
         {
-            return ServiceResult.InValidInput;
+            return ServiceResult.InvalidInput;
         }
 
-        Transaction newtransaction = new Transaction(amount, type, category, date ?? DateTime.Now);//Nytt obejekt, konstrukton sätter id och datum om inget annat anges
+        Transaction newTransaction = new Transaction(amount, type, category, date ?? DateTime.Now); // Nytt objekt. Konstruktorn sätter id; utan angivet datum används dagens datum
 
-        _transactionStore.AddItem(newtransaction);
-        _logger.Info(LogEvent.TransactionAdded, $"Transaktion {newtransaction.Id} tillagd: {newtransaction.Type}, {newtransaction.Amount} kr, {newtransaction.Category}, {newtransaction.Date:yyyy-MM-dd}");
+        _transactionStore.AddItem(newTransaction);
+        _logger.Info(LogEvent.TransactionAdded, $"Transaktion {newTransaction.Id} tillagd: {newTransaction.Type}, {newTransaction.Amount} kr, {newTransaction.Category}, {newTransaction.Date:yyyy-MM-dd}");
         return ServiceResult.Success;
     }
+
     public ServiceResult AddBudget(int month, int year, decimal limit)
     {
-        string? FelMeddelande = MonthlyBudget.IsValid(month, year, limit); // Använder IsValid, får ur rätt fel beroende på felet
-        if (FelMeddelande != null)
+        string? errorMessage = MonthlyBudget.IsValid(month, year, limit); // IsValid returnerar ett felmeddelande, eller null om budgeten är giltig
+        if (errorMessage != null)
         {
-            return ServiceResult.InValidInput;
+            return ServiceResult.InvalidInput;
         }
 
-        bool exits = _budgetStore.GetAll().Any(budget => budget.Month == month && budget.Year == year); //kollar iaf de finns en budget redan
-        if (exits)
+        bool exists = _budgetStore.GetAll().Any(budget => budget.Month == month && budget.Year == year); // Kontrollerar om det redan finns en budget för månaden
+        if (exists)
         {
-            return ServiceResult.AlreadyExist;
+            return ServiceResult.AlreadyExists;
         }
 
-        MonthlyBudget nyBudget = new MonthlyBudget(month, year, limit); // skapa nytt obejekt
-        _budgetStore.AddItem(nyBudget); // lägger till
+        MonthlyBudget newBudget = new MonthlyBudget(month, year, limit); // Skapar nytt objekt
+        _budgetStore.AddItem(newBudget); // Lägger till
         _logger.Info(LogEvent.BudgetAdded, $"Budget {year}-{month:00} tillagd: {limit} kr");
         return ServiceResult.Success;
     }
-    public MonthlyBudget? GetBudget(int month, int year) // metod för att hämta rätt budget, kommer retunera null ifall den ej hittas
+    public MonthlyBudget? GetBudget(int month, int year) // Hämtar budgeten för månaden, eller null om den inte finns
     {
         return _budgetStore.GetAll().FirstOrDefault(budget => budget.Month == month && budget.Year == year);
     }
-    public ServiceResult UpdateMonthlyBudget(int month, int year, decimal newlimit)// metod för att uppdatera Budgeten obs ändast gränsen
+
+    public ServiceResult UpdateMonthlyBudget(int month, int year, decimal newLimit) // Uppdaterar budgeten, obs endast gränsen
     {
-        MonthlyBudget? budget = GetBudget(month, year); // Använder getmetoden ifall jag får null så hittar den ej
+        MonthlyBudget? budget = GetBudget(month, year); // Använder GetBudget; null betyder att budgeten inte finns
         if (budget == null)
         {
             return ServiceResult.NotFound;
         }
         decimal oldLimit = budget.Limit;
-        string? felMeddelande = budget.Update(newlimit);
-        if (felMeddelande != null)
+        string? errorMessage = budget.Update(newLimit);
+        if (errorMessage != null)
         {
-            return ServiceResult.InValidInput;
+            return ServiceResult.InvalidInput;
         }
-        _logger.Info(LogEvent.BudgetUpdated, $"Budget {year}-{month:00} ändrad: {oldLimit} kr → {newlimit} kr");
+        _logger.Info(LogEvent.BudgetUpdated, $"Budget {year}-{month:00} ändrad: {oldLimit} kr → {newLimit} kr");
         return ServiceResult.Success;
     }
+
     public ServiceResult RemoveBudget(int month, int year)
     {
         MonthlyBudget? budget = GetBudget(month, year);
@@ -127,15 +125,17 @@ public class BudgetService
         _logger.Info(LogEvent.BudgetRemoved, $"Budget {year}-{month:00} borttagen: {budget.Limit} kr");
         return ServiceResult.Success;
     }
-    public decimal GetTotalincome(int month, int year)// Hitta rätt månad och summera inkomsterna 
+    public decimal GetTotalIncome(int month, int year) // Hittar rätt månad och summerar inkomsterna
     {
         return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount); // t för transaction
     }
-    public decimal GetTotalexpense(int month, int year)// Hitta rätt månad och summera utgifterna 
+
+    public decimal GetTotalExpense(int month, int year) // Hittar rätt månad och summerar utgifterna
     {
         return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
     }
-    public Dictionary<string, decimal> GetExpenseTotalsByCategory(int month, int year) //Dictionary så varje utgiftkatogeri få ett värde
+
+    public Dictionary<string, decimal> GetExpenseTotalsByCategory(int month, int year) // Dictionary där varje utgiftskategori får sin summa
     {
         return _transactionStore.GetAll()
             .Where(transaction => transaction.Date.Month == month && transaction.Date.Year == year && transaction.Type == TransactionType.Expense)
@@ -143,24 +143,15 @@ public class BudgetService
             .ToDictionary(group => group.Key,
             group => group.Sum(transaction => transaction.Amount));
     }
-    public decimal GetIncomeDay(int day, int month, int year) // hitta rätt dag och summeera inkomsterna
-    {
-        return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Income).Sum(t => t.Amount);
-    }
-    public decimal GetExpenseDay(int day, int month, int year) // hitta rätt dag och summeera utgifterna
-    {
-        return _transactionStore.GetAll().Where(t => t.Date.Day == day && t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount);
-    }
 
-    public decimal? GetRemainingBudget(int month, int year) // ? kan va null
+    public decimal? GetRemainingBudget(int month, int year) // decimal? eftersom svaret är null när ingen budget finns
     {
         MonthlyBudget? budget = GetBudget(month, year);
-        if (budget == null) // om man inte hitta någon budget
+        if (budget == null) // Om ingen budget hittas
         {
             return null;
         }
-        decimal Expenses = GetTotalexpense(month, year);
-        return budget.Limit - Expenses; // kan bli negativt tal
+        decimal expenses = GetTotalExpense(month, year);
+        return budget.Limit - expenses; // Kan bli ett negativt tal
     }
-
 }

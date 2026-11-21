@@ -16,8 +16,8 @@ namespace ShipItBudget.UI
         {
             Dictionary<string, decimal> expensesByCategory = budgetService.GetExpenseTotalsByCategory(today.Month, today.Year);
 
-            decimal totalIncome = budgetService.GetTotalincome(today.Month, today.Year);
-            decimal totalExpense = budgetService.GetTotalexpense(today.Month, today.Year);
+            decimal totalIncome = budgetService.GetTotalIncome(today.Month, today.Year);
+            decimal totalExpense = budgetService.GetTotalExpense(today.Month, today.Year);
             MonthlyBudget? budget = budgetService.GetBudget(today.Month, today.Year);
             decimal? remainingBudget = budgetService.GetRemainingBudget(today.Month, today.Year);
 

@@ -3,17 +3,17 @@ using System.Text.Json.Serialization;
 public class Transaction
 {
     [JsonInclude] // Behövs för JSON-serialisering eftersom setter är privat.
-    public Guid Id { get; private set; }// Guid skapar unikt id nummer
+    public Guid Id { get; private set; } // Guid är ett unikt id
     public decimal Amount { get; private set; }
     public TransactionType Type { get; private set; }
     public DateTime Date { get; private set; }
     public string Category { get; private set; }
 
-    public void Update(decimal amount, TransactionType type, DateTime date, string category) //metod som gör det möjligt att upptadera utanför klassen
+    public void Update(decimal amount, TransactionType type, DateTime date, string category) // Gör det möjligt att uppdatera transaktionen utanför klassen
     {
-        if (IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
+        if (IsValid(amount, category) == false) // Stoppar en transaktion som inte uppfyller kraven i IsValid
         {
-            throw new ArgumentException("Ogiltiga värden uppgavs"); //Avbryter
+            throw new ArgumentException("Ogiltiga värden uppgavs"); // Avbryter
         }
         Amount = amount;
         Type = type;
@@ -21,7 +21,7 @@ public class Transaction
         Category = category;
     }
 
-    public static bool IsValid(decimal amount, string category) //Valederings metod som kollar så en transaktion är Valid
+    public static bool IsValid(decimal amount, string category) // Valideringsmetod som kontrollerar att en transaktion är giltig
     {
         if (amount <= 0) return false;
         if (string.IsNullOrWhiteSpace(category)) return false;
@@ -29,11 +29,11 @@ public class Transaction
 
     }
 
-    public Transaction(decimal amount, TransactionType type, string category, DateTime date) // Skapa transaction
+    public Transaction(decimal amount, TransactionType type, string category, DateTime date) // Skapar en transaktion
     {
-        if (IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
+        if (IsValid(amount, category) == false) // Stoppar en transaktion som inte uppfyller kraven i IsValid
         {
-            throw new ArgumentException("Ogiltiga värden uppgavs"); //Avbrytter
+            throw new ArgumentException("Ogiltiga värden uppgavs"); // Avbryter
         }
 
         Id = Guid.NewGuid();
