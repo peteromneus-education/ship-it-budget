@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 public class Transaction
 {
-    [JsonInclude]
+    [JsonInclude] // Behövs för JSON-serialisering eftersom setter är privat.
     public Guid Id { get; private set; }// Guid skapar unikt id nummer
     public decimal Amount { get; private set; }
     public TransactionType Type { get; private set; }
@@ -13,7 +13,7 @@ public class Transaction
     {
         if (IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
         {
-            throw new ArgumentException("Ogiltiga värden uppgavs"); //brytter den nya transaktionen
+            throw new ArgumentException("Ogiltiga värden uppgavs"); //Avbryter
         }
         Amount = amount;
         Type = type;
@@ -29,11 +29,11 @@ public class Transaction
 
     }
 
-    public Transaction(decimal amount, TransactionType type, string category, DateTime date) // Konstruktör 
+    public Transaction(decimal amount, TransactionType type, string category, DateTime date) // Skapa transaction
     {
         if (IsValid(amount, category) == false) // sätter stopp för en transaktion som inte uppfyller kraven i Isvalid metoden
         {
-            throw new ArgumentException("Ogiltiga värden uppgavs"); //brytter den nya transaktionen
+            throw new ArgumentException("Ogiltiga värden uppgavs"); //Avbrytter
         }
 
         Id = Guid.NewGuid();

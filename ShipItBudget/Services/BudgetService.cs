@@ -1,6 +1,6 @@
 using System;
 using ShipItBudget;
-public enum ServiceResult
+public enum ServiceResult //Fasta val för resultat
 {
     Success,
     NotFound,
@@ -9,10 +9,11 @@ public enum ServiceResult
 }
 public class BudgetService
 {
-    private readonly DataStore<Transaction> _transactionStore;
+    private readonly DataStore<Transaction> _transactionStore; //Kopplingar till datalagringen 
     private readonly DataStore<MonthlyBudget> _budgetStore;
-    private readonly Logger _logger;
+    private readonly Logger _logger; //Loggar händelser
 
+    //Konstruktor som koppla in lagring och logger
     public BudgetService(DataStore<Transaction> transactionStore, DataStore<MonthlyBudget> budgetStore, Logger logger)
     {
         _transactionStore = transactionStore;
@@ -134,7 +135,7 @@ public class BudgetService
     {
         return _transactionStore.GetAll().Where(t => t.Date.Month == month && t.Date.Year == year && t.Type == TransactionType.Expense).Sum(t => t.Amount); // t för transaction
     }
-    public Dictionary<string, decimal> GetExpenseTotalsByCategory(int month, int year)
+    public Dictionary<string, decimal> GetExpenseTotalsByCategory(int month, int year) //Dictionary så varje utgiftkatogeri få ett värde
     {
         return _transactionStore.GetAll()
             .Where(transaction => transaction.Date.Month == month && transaction.Date.Year == year && transaction.Type == TransactionType.Expense)
