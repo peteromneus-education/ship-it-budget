@@ -3,7 +3,7 @@
 En terminalapplikation för personlig budgethantering, byggd i C# med Spectre.Console
 Utvecklad av gruppen **Ship It** (Carl Svensson, Firat Caan och Peter Omnéus) i kursen *Objektorienterad programmering, grund* – inlämningsuppgiften DataVerse Manager.
 
-![Huvudmeny](docs/images/Huvudmeny.png)
+![Huvudmeny](docs/Images/Huvudmeny.png)
 
 ## Funktioner
 
@@ -13,7 +13,7 @@ Utvecklad av gruppen **Ship It** (Carl Svensson, Firat Caan och Peter Omnéus) i
 * **Statistik:** summor för månaden och ett diagram över utgifter per kategori.
 * **Logg:** alla ändringar och fel sparas i `log.json`.
 
-![Kalendern](docs/images/Kalendervy.png)
+![Kalendern](docs/Images/Kalendervy.png)
 
 ## Kom igång
 
